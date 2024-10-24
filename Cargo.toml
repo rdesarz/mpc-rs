@@ -1,0 +1,7 @@
+[package]
+name = "mpc_rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+argmin = "0.10.0"
