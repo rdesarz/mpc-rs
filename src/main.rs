@@ -32,10 +32,15 @@ mod simulator
 fn main() {
     let mut system = simulator::TwoWheeledSystem{x: 0.0, y: 0.0, yaw: 0.0, v: 0.0};
 
-    println!("{:?}", system);
-    simulator::apply_differential_model(&mut system, &simulator::Command{u1: 1.0, u2: 0.0}, 0.5);
-    println!("{:?}", system);
-    simulator::apply_differential_model(&mut system, &simulator::Command{u1: 1.0, u2: 0.0}, 0.5);
-    println!("{:?}", system);
+    let command = simulator::Command{u1: 1.0, u2: 0.0};
+    let delta_t = 0.1;
+
+    println!("Initial state : {:?}", system);
+
+    for _ in 1..100
+    {
+        simulator::apply_differential_model(&mut system, &command, delta_t);
+        println!("{:?}", system);
+    }
 }
 
