@@ -31,9 +31,28 @@ mod simulator
     }
 }
 
-
+use ndarray::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Define parameters
+    let m1 = 2.0;
+    let m2 = 2.0;
+    let k1 = 100.0;
+    let k2 = 200.0; 
+    let d1 = 1.0;
+    let d2 = 5.0; 
+    // Define the continuous-time system matrices
+    let ac = array![[0.0, 1.0, 0.0, 0.0],
+                    [-(k1+k2)/m1 ,  -(d1+d2)/m1 , k2/m1 , d2/m1 ],
+                    [0.0 , 0.0 ,  0.0 , 1.0], 
+                    [k2/m2,  d2/m2, -k2/m2, -d2/m2]];
+    let bc = array![[0.0],[0.0],[0.0],[1.0/m2]];
+    let cc = array![[1.0, 0.0, 0.0, 0.0]];
+
+    let r = 1;
+    let m = 1; // number of inputs and outputs
+    let n = 4; // state dimension
+
     let mut system = simulator::TwoWheeledSystem{x: 0.0, y: 0.0, yaw: 0.0, v: 0.0};
 
     let command = simulator::Command{u1: 1.0, u2: 0.0};
