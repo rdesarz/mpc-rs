@@ -32,6 +32,7 @@ mod simulator
 }
 
 use ndarray::prelude::*;
+use ndarray::Array;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
@@ -52,6 +53,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let r = 1;
     let m = 1; // number of inputs and outputs
     let n = 4; // state dimension
+
+    // Discretization constant
+    let sampling = 0.05;
+
+    // Model discretization
+    let I : Array::<f64, _> = Array::eye(ac.shape()[0]);
+    A=np.linalg.inv(I-sampling*Ac)
+    B=A*sampling*Bc
+    C=Cc
+
+    // # check the eigenvalues
+    // eigen_A=np.linalg.eig(Ac)[0]
+    // eigen_Aid=np.linalg.eig(A)[0]
+
+    // timeSampleTest=200
+
+    // # compute the system's step response
+    // inputTest=10*np.ones((1,timeSampleTest))
+    // x0test=np.zeros(shape=(4,1))
+
+
+    // # simulate the discrete-time system 
+    // Ytest, Xtest=systemSimulate(A,B,C,inputTest,x0test)
 
     let mut system = simulator::TwoWheeledSystem{x: 0.0, y: 0.0, yaw: 0.0, v: 0.0};
 
