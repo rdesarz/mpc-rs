@@ -33,6 +33,7 @@ mod simulator
 
 use ndarray::prelude::*;
 use ndarray::Array;
+use ndarray_linalg::Inverse;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
@@ -59,9 +60,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Model discretization
     let I : Array::<f64, _> = Array::eye(ac.shape()[0]);
-    A=np.linalg.inv(I-sampling*Ac)
-    B=A*sampling*Bc
-    C=Cc
+    // let A = np.linalg.inv(I-sampling*Ac)
+    // let B = A*sampling*Bc
+    // let C = Cc
 
     // # check the eigenvalues
     // eigen_A=np.linalg.eig(Ac)[0]
