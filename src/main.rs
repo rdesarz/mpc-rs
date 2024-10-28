@@ -33,7 +33,7 @@ mod simulator
 
 use ndarray::prelude::*;
 use ndarray::Array;
-use ndarray_linalg::Inverse;
+use ndarray_linalg::solve::Inverse;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
@@ -44,12 +44,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let d1 = 1.0;
     let d2 = 5.0; 
     // Define the continuous-time system matrices
-    let ac = array![[0.0, 1.0, 0.0, 0.0],
+    let Ac = array![[0.0, 1.0, 0.0, 0.0],
                     [-(k1+k2)/m1 ,  -(d1+d2)/m1 , k2/m1 , d2/m1 ],
                     [0.0 , 0.0 ,  0.0 , 1.0], 
                     [k2/m2,  d2/m2, -k2/m2, -d2/m2]];
-    let bc = array![[0.0],[0.0],[0.0],[1.0/m2]];
-    let cc = array![[1.0, 0.0, 0.0, 0.0]];
+    let Bc = array![[0.0],[0.0],[0.0],[1.0/m2]];
+    let Cc = array![[1.0, 0.0, 0.0, 0.0]];
+
+    // let test = Ac.inv()?;
 
     let r = 1;
     let m = 1; // number of inputs and outputs
@@ -59,10 +61,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sampling = 0.05;
 
     // Model discretization
-    let I : Array::<f64, _> = Array::eye(ac.shape()[0]);
-    // let A = np.linalg.inv(I-sampling*Ac)
-    // let B = A*sampling*Bc
-    // let C = Cc
+    let I : Array::<f64, Ix2> = Array::eye(Ac.shape()[0]);
+    let A : Array::<f64, Ix2> = I - sampling * Ac;
+    // let inverse = A.inv()?;
+    let B = A * sampling * Bc;
+    let C = Cc;
 
     // # check the eigenvalues
     // eigen_A=np.linalg.eig(Ac)[0]
