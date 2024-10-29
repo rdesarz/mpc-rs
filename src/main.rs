@@ -73,9 +73,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let time_sample_test = 200;
 
-    // # compute the system's step response
-    // inputTest=10*np.ones((1,timeSampleTest))
-    // x0test=np.zeros(shape=(4,1))
+    // Compute the system's step response
+    let input_test = 10.0 * Array::ones((1, time_sample_test));
+    let x0_test : Array::<f64, _> = Array::zeros((4, 1));
 
 
     // # simulate the discrete-time system 
