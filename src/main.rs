@@ -33,7 +33,7 @@ mod simulator
 
 use ndarray::prelude::*;
 use ndarray::Array;
-use ndarray_linalg::solve::Inverse;
+use ndarray_linalg::{Inverse, Eig};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
@@ -61,17 +61,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sampling = 0.05;
 
     // Model discretization
-    let I : Array::<f64, Ix2> = Array::eye(Ac.shape()[0]);
-    let A : Array::<f64, Ix2> = I - sampling * Ac;
-    // let inverse = A.inv()?;
-    let B = A * sampling * Bc;
+    let I : Array::<f64, _> = Array::eye(Ac.shape()[0]);
+    let mut A : Array::<f64, _> = I - sampling * Ac.clone();
+    A = A.inv()?;
+    let B = A.clone() * sampling * Bc;
     let C = Cc;
 
-    // # check the eigenvalues
-    // eigen_A=np.linalg.eig(Ac)[0]
-    // eigen_Aid=np.linalg.eig(A)[0]
+    // check the eigenvalues
+    let eigen_A = Ac.eig()?;
+    let eigen_Aid = A.eig()?;
 
-    // timeSampleTest=200
+    let time_sample_test = 200;
 
     // # compute the system's step response
     // inputTest=10*np.ones((1,timeSampleTest))
