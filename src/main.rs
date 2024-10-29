@@ -1,7 +1,12 @@
 use plotters::prelude::*;
+use ndarray::prelude::*;
+use ndarray::Array;
+use ndarray_linalg::{Inverse, Eig};
 
 mod simulator
 {
+    use ndarray::{Array, Ix2};
+
     #[derive(Debug, Copy, Clone)]
     pub struct TwoWheeledSystem
     {
@@ -29,11 +34,28 @@ mod simulator
         system.yaw += dt * d_yaw;
         system.v += dt * dv;
     }
+
+    pub fn system_simulate(A: &Array::<f64, Ix2>, B: &Array::<f64, Ix2>, C: &Array::<f64, Ix2>, U: &Array::<f64, Ix2>, x0: &Array::<f64, Ix2>)
+    {
+        // simTime=U.shape[1]
+        // n=A.shape[0]
+        // r=C.shape[0]
+        // X=np.zeros(shape=(n,simTime+1))
+        // Y=np.zeros(shape=(r,simTime))
+        // for i in range(0,simTime):
+        //     if i==0:
+        //         X[:,[i]]=x0
+        //         Y[:,[i]]=np.matmul(C,x0)
+        //         X[:,[i+1]]=np.matmul(A,x0)+np.matmul(B,U[:,[i]])
+        //     else:
+        //         Y[:,[i]]=np.matmul(C,X[:,[i]])
+        //         X[:,[i+1]]=np.matmul(A,X[:,[i]])+np.matmul(B,U[:,[i]])
+        
+        // return Y,X
+    }
 }
 
-use ndarray::prelude::*;
-use ndarray::Array;
-use ndarray_linalg::{Inverse, Eig};
+
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
