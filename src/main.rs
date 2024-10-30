@@ -37,10 +37,10 @@ mod simulator
 
     pub fn system_simulate(A: &Array::<f64, Ix2>, B: &Array::<f64, Ix2>, C: &Array::<f64, Ix2>, U: &Array::<f64, Ix2>, x0: &Array::<f64, Ix2>)
     {
-        // simTime=U.shape[1]
-        // n=A.shape[0]
-        // r=C.shape[0]
-        // X=np.zeros(shape=(n,simTime+1))
+        let sim_time =U.shape()[1];
+        let n = A.shape()[0];
+        let r = C.shape()[0];
+        let X : Array<f64, Ix2> = Array::zeros((n, sim_time + 1));
         // Y=np.zeros(shape=(r,simTime))
         // for i in range(0,simTime):
         //     if i==0:
