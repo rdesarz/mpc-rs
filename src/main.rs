@@ -1,11 +1,10 @@
 use plotters::prelude::*;
-use ndarray::prelude::*;
-use ndarray::Array;
+use ndarray::{Array, array};
 use ndarray_linalg::{Inverse, Eig};
 
 mod simulator
 {
-    use ndarray::{Array, Ix2};
+    use ndarray::{Array, Ix2, s};
 
     #[derive(Debug, Copy, Clone)]
     pub struct TwoWheeledSystem
@@ -40,13 +39,13 @@ mod simulator
         let sim_time =U.shape()[1];
         let n = A.shape()[0];
         let r = C.shape()[0];
-        let X : Array<f64, Ix2> = Array::zeros((n, sim_time + 1));
-        let Y : Array<f64, Ix2> = Array::zeros((r, sim_time));
+        let mut X : Array<f64, Ix2> = Array::zeros((n, sim_time + 1));
+        let mut Y : Array<f64, Ix2> = Array::zeros((r, sim_time));
         for i in 0..sim_time
         {
-            if (i == 0)
+            if i == 0
             {
-            //     X[:,[i]]=x0
+                X.slice_mut(s![.., i]) = x0;
             //     Y[:,[i]]=np.matmul(C,x0)
             //     X[:,[i+1]]=np.matmul(A,x0)+np.matmul(B,U[:,[i]])
             }
