@@ -41,15 +41,23 @@ mod simulator
         let n = A.shape()[0];
         let r = C.shape()[0];
         let X : Array<f64, Ix2> = Array::zeros((n, sim_time + 1));
-        // Y=np.zeros(shape=(r,simTime))
-        // for i in range(0,simTime):
-        //     if i==0:
-        //         X[:,[i]]=x0
-        //         Y[:,[i]]=np.matmul(C,x0)
-        //         X[:,[i+1]]=np.matmul(A,x0)+np.matmul(B,U[:,[i]])
-        //     else:
-        //         Y[:,[i]]=np.matmul(C,X[:,[i]])
-        //         X[:,[i+1]]=np.matmul(A,X[:,[i]])+np.matmul(B,U[:,[i]])
+        let Y : Array<f64, Ix2> = Array::zeros((r, sim_time));
+        for i in 0..sim_time
+        {
+            if (i == 0)
+            {
+            //     X[:,[i]]=x0
+            //     Y[:,[i]]=np.matmul(C,x0)
+            //     X[:,[i+1]]=np.matmul(A,x0)+np.matmul(B,U[:,[i]])
+            }
+            else
+            {
+                // Y[:,[i]]=np.matmul(C,X[:,[i]])
+                // X[:,[i+1]]=np.matmul(A,X[:,[i]])+np.matmul(B,U[:,[i]])
+            }
+
+        }
+            
         
         // return Y,X
     }
