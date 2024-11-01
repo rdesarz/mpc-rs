@@ -45,9 +45,9 @@ mod simulator
         {
             if i == 0
             {
-                X.slice_mut(s![.., i]) = x0;
-            //     Y[:,[i]]=np.matmul(C,x0)
-            //     X[:,[i+1]]=np.matmul(A,x0)+np.matmul(B,U[:,[i]])
+                X.slice_mut(s![.., i]).assign(&x0);
+                Y.slice_mut(s![..,i]).assign(&(C * x0));
+                X.slice_mut(s![..,i+1]).assign(&(A * x0 + B.dot(&U.slice(s![..,i]))));
             }
             else
             {
