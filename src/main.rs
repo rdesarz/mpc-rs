@@ -51,13 +51,15 @@ mod simulator {
             } else {
                 Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
                 // X.slice_mut(s![.., i + 1])
-                    // .assign(&(A.dot(&X.slice(s![.., i])) + B.dot(&U.slice(s![.., i]))))
+                //     .assign(&(A.dot(&X.slice(s![.., i])) + B.dot(&U.slice(s![.., i]))))
             }
         }
 
         (Y, X)
     }
 }
+
+use simulator::system_simulate;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
@@ -76,8 +78,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
     let Bc = array![[0.0], [0.0], [0.0], [1.0 / m2]];
     let Cc = array![[1.0, 0.0, 0.0, 0.0]];
-
-    // let test = Ac.inv()?;
 
     let r = 1;
     let m = 1; // number of inputs and outputs
@@ -104,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0_test: Array<f64, _> = Array::zeros((4, 1));
 
     // # simulate the discrete-time system
-    // Ytest, Xtest=systemSimulate(A,B,C,inputTest,x0test)
+    let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test , &x0_test);
 
     let mut system = simulator::TwoWheeledSystem {
         x: 0.0,
