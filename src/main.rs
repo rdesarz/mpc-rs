@@ -36,7 +36,7 @@ mod simulator {
         C: &Array<f64, Ix2>,
         U: &Array<f64, Ix2>,
         x0: &Array<f64, Ix2>,
-    ) {
+    ) -> (Array<f64, Ix2>, Array<f64, Ix2>){
         let sim_time = U.shape()[1];
         let n = A.shape()[0];
         let r = C.shape()[0];
@@ -50,12 +50,12 @@ mod simulator {
                     .assign(&(A * x0 + B.dot(&U.slice(s![.., i]))));
             } else {
                 Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
-                // Y[:,[i]]=np.matmul(C,X[:,[i]])
-                // X[:,[i+1]]=np.matmul(A,X[:,[i]])+np.matmul(B,U[:,[i]])
+                // X.slice_mut(s![.., i + 1])
+                    // .assign(&(A.dot(&X.slice(s![.., i])) + B.dot(&U.slice(s![.., i]))))
             }
         }
 
-        // return Y,X
+        (Y, X)
     }
 }
 
