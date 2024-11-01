@@ -106,42 +106,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // # simulate the discrete-time system
     let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test , &x0_test);
 
-    let mut system = simulator::TwoWheeledSystem {
-        x: 0.0,
-        y: 0.0,
-        yaw: 0.0,
-        v: 0.0,
-    };
+    // let root = BitMapBackend::new("./step_response.png", (640, 480)).into_drawing_area();
+    // root.fill(&WHITE)?;
+    // let mut chart = ChartBuilder::on(&root)
+    //     .caption("step", ("sans-serif", 50).into_font())
+    //     .margin(5)
+    //     .x_label_area_size(30)
+    //     .y_label_area_size(30)
+    //     .build_cartesian_2d(-50f32..50f32, -0.1f32..1f32)?;
 
-    let command = simulator::Command { u1: 1.0, u2: 0.0 };
-    let delta_t = 0.1;
+    // chart.configure_mesh().draw()?;
 
-    println!("Initial state : {:?}", system);
+    // chart.draw_series(LineSeries::new(
+    //     Y_test,
+    //     &RED,
+    // ))?;
 
-    let mut trajectory = Vec::new();
-    for _ in 1..100 {
-        simulator::apply_differential_model(&mut system, &command, delta_t);
-        trajectory.push(system.clone());
-        println!("{:?}", system);
-    }
-
-    let root = BitMapBackend::new("./test.png", (640, 480)).into_drawing_area();
-    root.fill(&WHITE)?;
-    let mut chart = ChartBuilder::on(&root)
-        .caption("y=x^2", ("sans-serif", 50).into_font())
-        .margin(5)
-        .x_label_area_size(30)
-        .y_label_area_size(30)
-        .build_cartesian_2d(-50f32..50f32, -0.1f32..1f32)?;
-
-    chart.configure_mesh().draw()?;
-
-    chart.draw_series(LineSeries::new(
-        trajectory.iter().map(|state| (state.x, state.y)),
-        &RED,
-    ))?;
-
-    root.present()?;
+    // root.present()?;
 
     Ok(())
 }
