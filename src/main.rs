@@ -90,8 +90,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sampling = 0.05;
 
     // Model discretization
-    let I: Array<f64, _> = Array::eye(Ac.shape()[0]);
-    let mut A: Array<f64, _> = I - sampling * Ac.clone();
+    let I: Array2<f64> = Array::eye(Ac.shape()[0]);
+    let mut A: Array2<f64> = I - sampling * Ac.clone();
     A = A.inv()?;
     let B = A.clone() * sampling * Bc;
     let C = Cc;
@@ -103,10 +103,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let time_sample_test = 200;
 
     // Compute the system's step response
-    let input_test = 10.0 * Array::ones((1, time_sample_test));
-    let x0_test: Array<f64, _> = Array::zeros((4, 1));
+    let input_test = 10.0 * Array2::ones((1, time_sample_test));
+    let x0_test = Array1::zeros(4);
 
-    // # simulate the discrete-time system
+    // // # simulate the discrete-time system
     let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test , &x0_test);
 
     // let root = BitMapBackend::new("./step_response.png", (640, 480)).into_drawing_area();
