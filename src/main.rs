@@ -1,9 +1,9 @@
-use ndarray::{array, Array};
+use ndarray::{array, Array, Array1, Array2};
 use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
 
 mod simulator {
-    use ndarray::{s, Array, Ix2};
+    use ndarray::{s, Array1, Array2};
 
     #[derive(Debug, Copy, Clone)]
     pub struct TwoWheeledSystem {
@@ -31,17 +31,17 @@ mod simulator {
     }
 
     pub fn system_simulate(
-        A: &Array<f64, Ix2>,
-        B: &Array<f64, Ix2>,
-        C: &Array<f64, Ix2>,
-        U: &Array<f64, Ix2>,
-        x0: &Array<f64, Ix2>,
-    ) -> (Array<f64, Ix2>, Array<f64, Ix2>){
+        A: &Array2<f64>,
+        B: &Array2<f64>,
+        C: &Array2<f64>,
+        U: &Array2<f64>,
+        x0: &Array1<f64>,
+    ) -> (Array2<f64>, Array2<f64>){
         let sim_time = U.shape()[1];
         let n = A.shape()[0];
         let r = C.shape()[0];
-        let mut X: Array<f64, Ix2> = Array::zeros((n, sim_time + 1));
-        let mut Y: Array<f64, Ix2> = Array::zeros((r, sim_time));
+        let mut X = Array2::zeros((n, sim_time + 1));
+        let mut Y = Array2::zeros((r, sim_time));
         for i in 0..sim_time {
             if i == 0 {
                 X.slice_mut(s![.., i]).assign(&x0);
