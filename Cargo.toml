@@ -8,3 +8,4 @@ argmin = "0.10.0"
 plotters = "0.3.3"
 ndarray = "0.15" 
 ndarray-linalg = { version = "0.16", features = ["openblas-static"] }
+debug_plotter = "0.2.1"

@@ -63,6 +63,7 @@ mod simulator {
 
 use simulator::system_simulate;
 use std::env;
+use debug_plotter::plot;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
@@ -111,23 +112,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // // # simulate the discrete-time system
     let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test, &x0_test);
 
-    // let root = BitMapBackend::new("./step_response.png", (640, 480)).into_drawing_area();
-    // root.fill(&WHITE)?;
-    // let mut chart = ChartBuilder::on(&root)
-    //     .caption("step", ("sans-serif", 50).into_font())
-    //     .margin(5)
-    //     .x_label_area_size(30)
-    //     .y_label_area_size(30)
-    //     .build_cartesian_2d(-50f32..50f32, -0.1f32..1f32)?;
-
-    // chart.configure_mesh().draw()?;
-
-    // chart.draw_series(LineSeries::new(
-    //     Y_test,
-    //     &RED,
-    // ))?;
-
-    // root.present()?;
+    debug_plotter::plot!(Y_test where caption = "My Plot");
 
     Ok(())
 }
