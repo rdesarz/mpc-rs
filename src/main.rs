@@ -45,11 +45,12 @@ mod simulator {
         for i in 0..sim_time {
             if i == 0 {
                 X.slice_mut(s![.., i]).assign(&x0);
-                Y.slice_mut(s![.., i]).assign(&(C * x0));
+                Y.slice_mut(s![.., i]).assign(&(C .dot(x0)));
                 X.slice_mut(s![.., i + 1])
-                    .assign(&(A * x0 + B.dot(&U.slice(s![.., i]))));
+                    .assign(&(A.dot(x0) + B.dot(&U.slice(s![.., i]))));
             } else {
-                Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
+                // Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
+                // let temp = X.slice(s![.., i]).copy();
                 // X.slice_mut(s![.., i + 1])
                 //     .assign(&(A.dot(&X.slice(s![.., i])) + B.dot(&U.slice(s![.., i]))))
             }
@@ -93,7 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let I: Array2<f64> = Array::eye(Ac.shape()[0]);
     let mut A: Array2<f64> = I - sampling * Ac.clone();
     A = A.inv()?;
-    let B = A.clone() * sampling * Bc;
+    let B = A.dot(&(sampling * Bc));
     let C = Cc;
 
     // check the eigenvalues
