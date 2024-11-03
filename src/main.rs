@@ -36,7 +36,7 @@ mod simulator {
         C: &Array2<f64>,
         U: &Array2<f64>,
         x0: &Array1<f64>,
-    ) -> (Array2<f64>, Array2<f64>){
+    ) -> (Array2<f64>, Array2<f64>) {
         let sim_time = U.shape()[1];
         let n = A.shape()[0];
         let r = C.shape()[0];
@@ -45,14 +45,15 @@ mod simulator {
         for i in 0..sim_time {
             if i == 0 {
                 X.slice_mut(s![.., i]).assign(&x0);
-                Y.slice_mut(s![.., i]).assign(&(C .dot(x0)));
+                Y.slice_mut(s![.., i]).assign(&(C.dot(x0)));
                 X.slice_mut(s![.., i + 1])
                     .assign(&(A.dot(x0) + B.dot(&U.slice(s![.., i]))));
             } else {
-                // Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
-                // let temp = X.slice(s![.., i]).copy();
-                // X.slice_mut(s![.., i + 1])
-                //     .assign(&(A.dot(&X.slice(s![.., i])) + B.dot(&U.slice(s![.., i]))))
+                Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
+
+                let X_slice = X.slice(s![.., i]).to_owned();
+                X.slice_mut(s![.., i + 1])
+                    .assign(&(A.dot(&X_slice) + B.dot(&U.slice(s![.., i]))));
             }
         }
 
@@ -108,7 +109,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0_test = Array1::zeros(4);
 
     // // # simulate the discrete-time system
-    let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test , &x0_test);
+    let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test, &x0_test);
 
     // let root = BitMapBackend::new("./step_response.png", (640, 480)).into_drawing_area();
     // root.fill(&WHITE)?;
