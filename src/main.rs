@@ -141,7 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Plot system response
     let series_y: Vec<(i32, f64)> = y_test
-        .row(1)
+        .row(0)
         .iter()
         .enumerate()
         .map(|(i, &val)| (i as i32, val as f64))
