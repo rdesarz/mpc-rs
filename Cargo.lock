@@ -229,16 +229,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "debug_plotter"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44c90bc51ddd6db7d9c68615767bb72c6dc60413bf1c688fb8a2ebb2d7a808f1"
-dependencies = [
- "num-traits",
- "plotters",
-]
-
-[[package]]
 name = "dirs"
 version = "3.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -636,7 +626,6 @@ name = "mpc_rust"
 version = "0.1.0"
 dependencies = [
  "argmin",
- "debug_plotter",
  "ndarray",
  "ndarray-linalg",
  "plotters",

@@ -135,19 +135,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .collect();
 
     chart
-        .draw_series(LineSeries::new(series_input, &Palette99::pick(1)))?
-        .label(format!("Output {}", row))
-        .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(row)));
+        .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
+        .label(format!("Output {}", 0))
+        .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
     // Plot system response
     let series_y: Vec<(i32, f64)> = y_test
-        .row(0)
+        .row(1)
         .iter()
         .enumerate()
         .map(|(i, &val)| (i as i32, val as f64))
         .collect();
 
-    chart.draw_series(LineSeries::new(series_y, &Palette99::pick(0)))?;
+    chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
 
     chart
         .configure_series_labels()
