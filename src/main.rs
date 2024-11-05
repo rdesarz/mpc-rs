@@ -63,7 +63,6 @@ mod simulator {
 
 use simulator::system_simulate;
 use std::env;
-use debug_plotter::plot;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
@@ -110,9 +109,51 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0_test = Array1::zeros(4);
 
     // // # simulate the discrete-time system
-    let (Y_test, X_test) = system_simulate(&A, &B, &C, &input_test, &x0_test);
+    let (y_test, x_test) = system_simulate(&A, &B, &C, &input_test, &x0_test);
 
-    debug_plotter::plot!(Y_test where caption = "My Plot");
+    // Draw the response
+    let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
+    root.fill(&WHITE)?;
+
+    let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
+    let mut chart = ChartBuilder::on(&root)
+        .caption("System Output Y", ("sans-serif", 20))
+        .margin(10)
+        .x_label_area_size(30)
+        .y_label_area_size(40)
+        .build_cartesian_2d(0..y_test.shape()[1] as i32, min_y..max_y)?;
+
+    chart.configure_mesh().draw()?;
+
+    // Plot input
+    let series_input: Vec<(i32, f64)> = input_test
+        .row(0)
+        .iter()
+        .enumerate()
+        .map(|(i, &val)| (i as i32, val as f64))
+        .collect();
+
+    chart
+        .draw_series(LineSeries::new(series_input, &Palette99::pick(1)))?
+        .label(format!("Output {}", row))
+        .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(row)));
+
+    // Plot system response
+    let series_y: Vec<(i32, f64)> = y_test
+        .row(0)
+        .iter()
+        .enumerate()
+        .map(|(i, &val)| (i as i32, val as f64))
+        .collect();
+
+    chart.draw_series(LineSeries::new(series_y, &Palette99::pick(0)))?;
+
+    chart
+        .configure_series_labels()
+        .background_style(&WHITE)
+        .border_style(&BLACK)
+        .draw()?;
 
     Ok(())
 }
