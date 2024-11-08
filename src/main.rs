@@ -61,6 +61,19 @@ mod simulator {
     }
 }
 
+mod controller
+{
+    pub struct Controller{
+        pub A: Array2<f64>,
+        pub B: Array2<f64>,
+        pub C: Array2<f64>,
+        pub f: Array2<f64>,
+        pub v: Array2<f64>,
+        pub W3: Array2<f64>,
+        pub W4: Array2<f64>,
+    }
+}
+
 use simulator::system_simulate;
 use std::env;
 
