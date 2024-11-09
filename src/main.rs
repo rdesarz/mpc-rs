@@ -79,7 +79,7 @@ mod controller {
     impl Controller {
         fn form_lifted_matrices(&self) {}
 
-        fn propagate_dynamics(&self) {}
+        fn propagate_dynamics(&self, control_input: &Array2<f64>, state: &Array2<f64>) {}
 
         fn compute_control_inputs(&self) {}
     }
