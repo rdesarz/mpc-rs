@@ -61,16 +61,27 @@ mod simulator {
     }
 }
 
-mod controller
-{
-    pub struct Controller{
-        pub A: Array2<f64>,
-        pub B: Array2<f64>,
-        pub C: Array2<f64>,
-        pub f: Array2<f64>,
-        pub v: Array2<f64>,
-        pub W3: Array2<f64>,
-        pub W4: Array2<f64>,
+mod controller {
+    use ndarray::Array2;
+
+    pub struct Controller {
+        A: Array2<f64>,
+        B: Array2<f64>,
+        C: Array2<f64>,
+        f: Array2<f64>,
+        v: Array2<f64>,
+        W3: Array2<f64>,
+        W4: Array2<f64>,
+        desired_control_traj: Array2<f64>,
+        current_timestep: i64,
+    }
+
+    impl Controller {
+        fn form_lifted_matrices(&self) {}
+
+        fn propagate_dynamics(&self) {}
+
+        fn compute_control_inputs(&self) {}
     }
 }
 
