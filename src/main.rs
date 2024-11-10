@@ -79,7 +79,19 @@ mod controller {
     impl Controller {
         fn form_lifted_matrices(&self) {}
 
-        fn propagate_dynamics(&self, control_input: &Array2<f64>, state: &Array2<f64>) {}
+        fn propagate_dynamics(
+            &self,
+            control_input: &Array2<f64>,
+            state: &Array2<f64>,
+        ) -> (Array2<f64>, Array2<f64>) {
+            let mut x_kp1 = Array2::zeros((self.A.shape()[0], 1));
+            let mut y_k = Array2::zeros((self.C.shape()[0], 1));
+
+            x_kp1.assign(&(self.A.dot(state) + self.B.dot(control_input)));
+            y_k.assign(&(self.C.dot(state)));
+
+            (x_kp1, y_k)
+        }
 
         fn compute_control_inputs(&self) {}
     }
