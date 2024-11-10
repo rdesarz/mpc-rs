@@ -119,8 +119,8 @@ mod controller {
 
             // Compute the control sequence
             let input_sequence_computed = self.gain_matrix.dot(&vec_s);
-            let input_applied : Array2<f64> = Array2::zeros((1, 1));
-            // inputApplied[0,0]=inputSequenceComputed[0,0]
+            let mut input_applied: Array2<f64> = Array2::zeros((1, 1));
+            input_applied[[0, 0]] = input_sequence_computed[[0, 0]];
 
             // Compute the next state and output
             // let state_kp1, output_k = self.propagate_dynamics(input_applied, self.states[self.currentTimeStep])
