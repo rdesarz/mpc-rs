@@ -62,7 +62,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{s, Array2, Array1};
+    use ndarray::{s, Array1, Array2, Axis};
 
     pub struct Controller {
         A: Array2<f64>,
@@ -78,6 +78,8 @@ mod controller {
         M: Array2<f64>,
         gain_matrix: Array2<f64>,
         states: Array2<f64>,
+        outputs: Array2<f64>,
+        inputs: Array2<f64>,
     }
 
     impl Controller {
@@ -101,7 +103,7 @@ mod controller {
             (x_kp1, y_k)
         }
 
-        fn compute_control_inputs(&self) {
+        fn compute_control_inputs(&mut self) {
             // Extract the segment of the desired control trajectory
             let desired_ctrl_traj = self
                 .desired_ctrl_traj_total
@@ -123,15 +125,18 @@ mod controller {
             input_applied[[0, 0]] = input_sequence_computed[[0, 0]];
 
             // Compute the next state and output
-            let (state_kp1, output_k) = self.propagate_dynamics(&input_applied, &self.states.slice(s![self.current_timestep, ..]).to_owned());
+            let (state_kp1, output_k) = self.propagate_dynamics(
+                &input_applied,
+                &self.states.slice(s![self.current_timestep, ..]).to_owned(),
+            );
 
             // Append the lists
-            // self.states.append(state_kp1)
-            // self.outputs.append(output_k)
-            // self.inputs.append(inputApplied)
+            self.states.append(Axis(0), (&state_kp1).into());
+            self.outputs.append(Axis(0), (&output_k).into());
+            self.inputs.append(Axis(0), (&input_applied).into());
 
             // Increment the time step
-            // self.currentTimeStep = self.currentTimeStep+1
+            self.current_timestep = self.current_timestep + 1;
         }
     }
 }
