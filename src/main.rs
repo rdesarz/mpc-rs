@@ -106,7 +106,7 @@ mod controller {
             let desired_ctrl_traj = self.desired_ctrl_traj_total.slice(s![self.current_timestep..(self.current_timestep + self.f),..]).to_owned();
  
             // Compute the vector s
-            // let vec_s = desired_ctrl_traj - self.O.dot(self.states[self.current_timestep]);
+            let vec_s = desired_ctrl_traj - self.O.dot(&self.states.slice(s![self.current_timestep,..]));
         
             // Compute the control sequence
             // inputSequenceComputed = np.matmul(self.gainMatrix,vectorS)
