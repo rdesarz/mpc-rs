@@ -62,7 +62,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{s, Array2};
+    use ndarray::{s, Array2, Array1};
 
     pub struct Controller {
         A: Array2<f64>,
@@ -90,7 +90,7 @@ mod controller {
         fn propagate_dynamics(
             &self,
             control_input: &Array2<f64>,
-            state: &Array2<f64>,
+            state: &Array1<f64>,
         ) -> (Array2<f64>, Array2<f64>) {
             let mut x_kp1 = Array2::zeros((self.A.shape()[0], 1));
             let mut y_k = Array2::zeros((self.C.shape()[0], 1));
@@ -123,7 +123,7 @@ mod controller {
             input_applied[[0, 0]] = input_sequence_computed[[0, 0]];
 
             // Compute the next state and output
-            // let state_kp1, output_k = self.propagate_dynamics(input_applied, self.states[self.currentTimeStep])
+            let (state_kp1, output_k) = self.propagate_dynamics(&input_applied, &self.states.slice(s![self.current_timestep, ..]).to_owned());
 
             // Append the lists
             // self.states.append(state_kp1)
