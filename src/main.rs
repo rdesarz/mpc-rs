@@ -62,13 +62,13 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{Array2, s};
+    use ndarray::{s, Array2};
 
     pub struct Controller {
         A: Array2<f64>,
         B: Array2<f64>,
         C: Array2<f64>,
-        f: usize, 
+        f: usize,
         v: usize,
         W3: Array2<f64>,
         W4: Array2<f64>,
@@ -103,24 +103,33 @@ mod controller {
 
         fn compute_control_inputs(&self) {
             // Extract the segment of the desired control trajectory
-            let desired_ctrl_traj = self.desired_ctrl_traj_total.slice(s![self.current_timestep..(self.current_timestep + self.f),..]).to_owned();
- 
+            let desired_ctrl_traj = self
+                .desired_ctrl_traj_total
+                .slice(s![
+                    self.current_timestep..(self.current_timestep + self.f),
+                    ..
+                ])
+                .to_owned();
+
             // Compute the vector s
-            let vec_s = desired_ctrl_traj - self.O.dot(&self.states.slice(s![self.current_timestep,..]));
-        
+            let vec_s = desired_ctrl_traj
+                - self
+                    .O
+                    .dot(&self.states.slice(s![self.current_timestep, ..]));
+
             // Compute the control sequence
-            // inputSequenceComputed = np.matmul(self.gainMatrix,vectorS)
-            // inputApplied=np.zeros(shape=(1,1))
+            let input_sequence_computed = self.gain_matrix.dot(&vec_s);
+            let input_applied : Array2<f64> = Array2::zeros((1, 1));
             // inputApplied[0,0]=inputSequenceComputed[0,0]
-            
+
             // Compute the next state and output
-            // state_kp1,output_k=self.propagateDynamics(inputApplied,self.states[self.currentTimeStep])
-            
+            // let state_kp1, output_k = self.propagate_dynamics(input_applied, self.states[self.currentTimeStep])
+
             // Append the lists
             // self.states.append(state_kp1)
             // self.outputs.append(output_k)
             // self.inputs.append(inputApplied)
-            
+
             // Increment the time step
             // self.currentTimeStep = self.currentTimeStep+1
         }
