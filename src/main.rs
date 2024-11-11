@@ -93,7 +93,7 @@ mod controller {
             let m = self.B.ncols();
 
             // Lifted matrix O
-            let O: Array2<f64> = Array2::zeros((self.f * r, n));
+            let mut O: Array2<f64> = Array2::zeros((self.f * r, n));
 
             let mut powA = self.A.clone();
             for i in 0..self.f
@@ -103,8 +103,7 @@ mod controller {
                     powA.assign(&(powA.dot(&self.A)));
                 }
 
-                
-                // O[i*r:(i+1)*r,:]=np.matmul(C,powA)
+                O.slice_mut(s![i * r..(i + 1) * r,..]).assign(&(self.C.dot(&powA)));
             }
                 
 
