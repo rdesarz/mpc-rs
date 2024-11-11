@@ -63,6 +63,7 @@ mod simulator {
 
 mod controller {
     use ndarray::{s, Array1, Array2, Axis};
+    use ndarray_linalg::Inverse;
 
     pub struct Controller {
         A: Array2<f64>,
@@ -87,7 +88,9 @@ mod controller {
         //     Point { x: x, y: y }
         // }
 
-        fn form_lifted_matrices(&self) {
+        fn form_lifted_matrices(
+            &self,
+        ) -> Result<(Array2<f64>, Array2<f64>, Array2<f64>), Box<dyn std::error::Error>> {
             let n = self.A.nrows();
             let r = self.C.nrows();
             let m = self.B.ncols();
@@ -151,11 +154,11 @@ mod controller {
                 }
             }
 
-            // tmp1=np.matmul(M.T,np.matmul(self.W4,M))
-            // tmp2=np.linalg.inv(tmp1+self.W3)
-            // gainMatrix=np.matmul(tmp2,np.matmul(M.T,self.W4))
+            let tmp1 = M.t().dot(&self.W4).dot(&M);
+            let tmp2: Array2<f64> = (tmp1 + &self.W3).to_owned().inv()?;
+            let gain_matrix = tmp2.dot(&M.t()).dot(&self.W4);
 
-            // return O,M,gainMatrix
+            Ok((O, M, gain_matrix))
         }
 
         fn propagate_dynamics(
