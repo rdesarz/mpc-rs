@@ -95,12 +95,18 @@ mod controller {
             // Lifted matrix O
             let O: Array2<f64> = Array2::zeros((self.f * r, n));
 
-            // for i in range(f):
-            //     if (i == 0):
-            //         powA=A;
-            //     else:
-            //         powA=np.matmul(powA,A)
-            //     O[i*r:(i+1)*r,:]=np.matmul(C,powA)
+            let mut powA = self.A.clone();
+            for i in 0..self.f
+            {
+                if i != 0
+                {
+                    powA.assign(&(powA.dot(&self.A)));
+                }
+
+                
+                // O[i*r:(i+1)*r,:]=np.matmul(C,powA)
+            }
+                
 
             // # lifted matrix M
             // M=np.zeros(shape=(f*r,v*m))
