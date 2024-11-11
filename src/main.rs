@@ -121,35 +121,35 @@ mod controller {
                         M.slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
                             .assign(&(self.C.dot(&powA).dot(&self.B)));
                     }
+                } else {
+                    for j in 0..self.v {
+                        // Here we form the last entry
+                        if j == 0 {
+                            let mut sum_last: Array2<f64> = Array2::zeros((n, n));
+                            for s in 0..i - self.v + 2 {
+                                if s == 0 {
+                                    powA = Array2::eye(n);
+                                } else {
+                                    powA.assign(&(powA.dot(&self.A)));
+                                }
+
+                                sum_last = sum_last + &powA;
+                            }
+
+                            M.slice_mut(s![i * r..(i + 1) * r, (self.v - 1) * m..(self.v) * m])
+                                .assign(&(self.C.dot(&sum_last).dot(&self.B)));
+                        } else {
+                            powA.assign(&(powA.dot(&self.A)));
+
+                            M.slice_mut(s![
+                                i * r..(i + 1) * r,
+                                (self.v - 1 - j) * m..(self.v - j) * m
+                            ])
+                            .assign(&(self.C.dot(&powA).dot(&self.B)));
+                        }
+                    }
                 }
             }
-
-            // for i in range(f):
-            //     # until the control horizon
-            //     if (i<v):
-            //         for j in range(i+1):
-            //             if (j == 0):
-            //                 powA=np.eye(n,n);
-            //             else:
-            //                 powA=np.matmul(powA,A)
-            //             M[i*r:(i+1)*r,(i-j)*m:(i-j+1)*m]=np.matmul(C,np.matmul(powA,B))
-
-            //     # from control horizon until the prediction horizon
-            //     else:
-            //         for j in range(v):
-            //             # here we form the last entry
-            //             if j==0:
-            //                 sumLast=np.zeros(shape=(n,n))
-            //                 for s in range(i-v+2):
-            //                     if (s == 0):
-            //                         powA=np.eye(n,n);
-            //                     else:
-            //                         powA=np.matmul(powA,A)
-            //                     sumLast=sumLast+powA
-            //                 M[i*r:(i+1)*r,(v-1)*m:(v)*m]=np.matmul(C,np.matmul(sumLast,B))
-            //             else:
-            //                 powA=np.matmul(powA,A)
-            //                 M[i*r:(i+1)*r,(v-1-j)*m:(v-j)*m]=np.matmul(C,np.matmul(powA,B))
 
             // tmp1=np.matmul(M.T,np.matmul(self.W4,M))
             // tmp2=np.linalg.inv(tmp1+self.W3)
