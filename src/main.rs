@@ -62,7 +62,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{s, Array1, Array2, Axis};
+    use ndarray::{s, Array1, Array2, Axis, array};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -84,79 +84,81 @@ mod controller {
     }
 
     impl Controller {
-        // fn new(A,B,C,f,v,W3,W4,x0,desiredControlTrajectoryTotal) -> Controller {
-        //     Point { x: x, y: y }
-        // }
-
         fn form_lifted_matrices(
-            &self,
+            A: &Array2<f64>,
+            B: &Array2<f64>,
+            C: &Array2<f64>,
+            f: usize,
+            v: usize,
+            W3: &Array2<f64>,
+            W4: &Array2<f64>
         ) -> Result<(Array2<f64>, Array2<f64>, Array2<f64>), Box<dyn std::error::Error>> {
-            let n = self.A.nrows();
-            let r = self.C.nrows();
-            let m = self.B.ncols();
+            let n = A.nrows();
+            let r = C.nrows();
+            let m = B.ncols();
 
             // Lifted matrix O
-            let mut O: Array2<f64> = Array2::zeros((self.f * r, n));
+            let mut O: Array2<f64> = Array2::zeros((f * r, n));
 
-            let mut powA = self.A.clone();
-            for i in 0..self.f {
+            let mut powA = A.clone();
+            for i in 0..f {
                 if i != 0 {
-                    powA.assign(&(powA.dot(&self.A)));
+                    powA.assign(&(powA.dot(A)));
                 }
 
                 O.slice_mut(s![i * r..(i + 1) * r, ..])
-                    .assign(&(self.C.dot(&powA)));
+                    .assign(&(C.dot(&powA)));
             }
 
             // Lifted matrix M
-            let mut M: Array2<f64> = Array2::zeros((self.f * r, self.v * m));
+            let mut M: Array2<f64> = Array2::zeros((f * r, v * m));
 
-            for i in 0..self.f {
+            for i in 0..f {
                 // Until the control horizon
-                if i < self.v {
+                if i < v {
                     for j in 0..(i + 1) {
                         if j == 0 {
                             powA = Array2::eye(n);
                         } else {
-                            powA.assign(&(powA.dot(&self.A)));
+                            powA.assign(&(powA.dot(A)));
                         }
 
                         M.slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
-                            .assign(&(self.C.dot(&powA).dot(&self.B)));
+                            .assign(&(C.dot(&powA).dot(B)));
                     }
                 } else {
-                    for j in 0..self.v {
+                    for j in 0..v {
                         // Here we form the last entry
                         if j == 0 {
                             let mut sum_last: Array2<f64> = Array2::zeros((n, n));
-                            for s in 0..i - self.v + 2 {
+                            for s in 0..i - v + 2 {
                                 if s == 0 {
                                     powA = Array2::eye(n);
                                 } else {
-                                    powA.assign(&(powA.dot(&self.A)));
+                                    powA.assign(&(powA.dot(A)));
                                 }
 
                                 sum_last = sum_last + &powA;
                             }
 
-                            M.slice_mut(s![i * r..(i + 1) * r, (self.v - 1) * m..(self.v) * m])
-                                .assign(&(self.C.dot(&sum_last).dot(&self.B)));
+                            M.slice_mut(s![i * r..(i + 1) * r, (v - 1) * m..(v) * m])
+                                .assign(&(C.dot(&sum_last).dot(B)));
                         } else {
-                            powA.assign(&(powA.dot(&self.A)));
+                            powA.assign(&(powA.dot(A)));
 
                             M.slice_mut(s![
                                 i * r..(i + 1) * r,
-                                (self.v - 1 - j) * m..(self.v - j) * m
+                                (v - 1 - j) * m..(v - j) * m
                             ])
-                            .assign(&(self.C.dot(&powA).dot(&self.B)));
+                            .assign(&(C.dot(&powA).dot(B)));
                         }
                     }
                 }
             }
 
-            let tmp1 = M.t().dot(&self.W4).dot(&M);
-            let tmp2: Array2<f64> = (tmp1 + &self.W3).to_owned().inv()?;
-            let gain_matrix = tmp2.dot(&M.t()).dot(&self.W4);
+            let tmp1 = M.t().dot(W4).dot(&M);
+            let tmp2: Array2<f64> = (tmp1 + W3).to_owned().inv()?;
+            let gain_matrix = tmp2.dot(&M.t()).dot(W4);
 
             Ok((O, M, gain_matrix))
         }
@@ -210,6 +212,53 @@ mod controller {
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;
         }
+
+        // fn new(
+        //     A: &Array2<f64>,
+        //     B: &Array2<f64>,
+        //     C: &Array2<f64>,
+        //     f: usize,
+        //     v: usize,
+        //     W3: &Array2<f64>,
+        //     W4: &Array2<f64>,
+        //     x0: Array1<f64>,
+        //     desired_ctrl_traj: &Array2<f64>,
+        // ) -> Result<Controller, Box<dyn std::error::Error>> {
+        //     // Form the lifted system matrices and vectors
+        //     // the gain matrix is used to compute the solution
+        //     // here we pre-compute it to save computational time 
+        //     let (O, M, gain_matrix) = form_lifted_matrices()?;
+
+        //     // We store the state vectors of the controlled state trajectory
+        //     let states = array![[x0]];
+
+        //     // We store the computed inputs
+        //     let inputs = array![];
+
+        //     // # we store the output vectors of the controlled state trajectory
+        //     // self.outputs=[]
+        //     // self.outputs.append(np.matmul(C,x0))
+
+        //     Controller {
+        //         A: A.clone(),
+        //         B: B.clone(),
+        //         C: C.clone(),
+        //         f: f,
+        //         v: v,
+        //         W3: W3.clone(),
+        //         W4: W4.clone(),
+        //         desired_ctrl_traj_total: desired_ctrl_traj,
+        //         current_timestep: 0,
+        //         O: O,
+        //         M: M,
+        //         gain_matrix: gain_matrix,
+                
+        //     }
+
+            
+
+            
+        // }
     }
 }
 
