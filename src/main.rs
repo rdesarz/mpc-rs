@@ -62,7 +62,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{s, Array1, Array2, Axis, array};
+    use ndarray::{s, array, Array1, Array2, Axis};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -91,7 +91,7 @@ mod controller {
             f: usize,
             v: usize,
             W3: &Array2<f64>,
-            W4: &Array2<f64>
+            W4: &Array2<f64>,
         ) -> Result<(Array2<f64>, Array2<f64>, Array2<f64>), Box<dyn std::error::Error>> {
             let n = A.nrows();
             let r = C.nrows();
@@ -146,11 +146,8 @@ mod controller {
                         } else {
                             powA.assign(&(powA.dot(A)));
 
-                            M.slice_mut(s![
-                                i * r..(i + 1) * r,
-                                (v - 1 - j) * m..(v - j) * m
-                            ])
-                            .assign(&(C.dot(&powA).dot(B)));
+                            M.slice_mut(s![i * r..(i + 1) * r, (v - 1 - j) * m..(v - j) * m])
+                                .assign(&(C.dot(&powA).dot(B)));
                         }
                     }
                 }
@@ -213,52 +210,51 @@ mod controller {
             self.current_timestep = self.current_timestep + 1;
         }
 
-        // fn new(
-        //     A: &Array2<f64>,
-        //     B: &Array2<f64>,
-        //     C: &Array2<f64>,
-        //     f: usize,
-        //     v: usize,
-        //     W3: &Array2<f64>,
-        //     W4: &Array2<f64>,
-        //     x0: Array1<f64>,
-        //     desired_ctrl_traj: &Array2<f64>,
-        // ) -> Result<Controller, Box<dyn std::error::Error>> {
-        //     // Form the lifted system matrices and vectors
-        //     // the gain matrix is used to compute the solution
-        //     // here we pre-compute it to save computational time 
-        //     let (O, M, gain_matrix) = form_lifted_matrices()?;
+        fn new(
+            A: &Array2<f64>,
+            B: &Array2<f64>,
+            C: &Array2<f64>,
+            f: usize,
+            v: usize,
+            W3: &Array2<f64>,
+            W4: &Array2<f64>,
+            x0: Array1<f64>,
+            desired_ctrl_traj: &Array2<f64>,
+        ) -> Result<Controller, Box<dyn std::error::Error>> {
+            // Form the lifted system matrices and vectors
+            // the gain matrix is used to compute the solution
+            // here we pre-compute it to save computational time
+            let (O, M, gain_matrix) = Self::form_lifted_matrices(A, B, C, f, v, W3, W4)?;
 
-        //     // We store the state vectors of the controlled state trajectory
-        //     let states = array![[x0]];
-
-        //     // We store the computed inputs
-        //     let inputs = array![];
-
-        //     // # we store the output vectors of the controlled state trajectory
-        //     // self.outputs=[]
-        //     // self.outputs.append(np.matmul(C,x0))
-
-        //     Controller {
-        //         A: A.clone(),
-        //         B: B.clone(),
-        //         C: C.clone(),
-        //         f: f,
-        //         v: v,
-        //         W3: W3.clone(),
-        //         W4: W4.clone(),
-        //         desired_ctrl_traj_total: desired_ctrl_traj,
-        //         current_timestep: 0,
-        //         O: O,
-        //         M: M,
-        //         gain_matrix: gain_matrix,
-                
-        //     }
-
+            // We store the state vectors of the controlled state trajectory
+            let mut states : Array2<f64> = Array2::zeros((1, 2));
+            states.slice_mut(s![1, ..]).assign(&x0); 
             
+            // We store the computed inputs
+            let inputs: Array2<f64> = array![[]];//A;
 
-            
-        // }
+            // # we store the output vectors of the controlled state trajectory
+            let mut outputs : Array2<f64> = Array2::zeros((1, 2));
+            outputs.slice_mut(s![1, ..]).assign(&(C.dot(&x0))); 
+
+            Ok(Controller {
+                A: A.clone(),
+                B: B.clone(),
+                C: C.clone(),
+                f: f,
+                v: v,
+                W3: W3.clone(),
+                W4: W4.clone(),
+                desired_ctrl_traj_total: desired_ctrl_traj.clone(),
+                current_timestep: 0,
+                O: O,
+                M: M,
+                gain_matrix: gain_matrix,
+                states: states,
+                inputs: inputs,
+                outputs: outputs
+            })
+        }
     }
 }
 
