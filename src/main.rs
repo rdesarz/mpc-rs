@@ -96,19 +96,33 @@ mod controller {
             let mut O: Array2<f64> = Array2::zeros((self.f * r, n));
 
             let mut powA = self.A.clone();
-            for i in 0..self.f
-            {
-                if i != 0
-                {
+            for i in 0..self.f {
+                if i != 0 {
                     powA.assign(&(powA.dot(&self.A)));
                 }
 
-                O.slice_mut(s![i * r..(i + 1) * r,..]).assign(&(self.C.dot(&powA)));
+                O.slice_mut(s![i * r..(i + 1) * r, ..])
+                    .assign(&(self.C.dot(&powA)));
             }
-                
 
-            // # lifted matrix M
-            // M=np.zeros(shape=(f*r,v*m))
+            // Lifted matrix M
+            let mut M: Array2<f64> = Array2::zeros((self.f * r, self.v * m));
+
+            for i in 0..self.f {
+                // Until the control horizon
+                if i < self.v {
+                    for j in 0..(i + 1) {
+                        if j == 0 {
+                            powA = Array2::eye(n);
+                        } else {
+                            powA.assign(&(powA.dot(&self.A)));
+                        }
+
+                        M.slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
+                            .assign(&(self.C.dot(&powA).dot(&self.B)));
+                    }
+                }
+            }
 
             // for i in range(f):
             //     # until the control horizon
