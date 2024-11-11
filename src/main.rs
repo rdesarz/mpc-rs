@@ -87,7 +87,57 @@ mod controller {
         //     Point { x: x, y: y }
         // }
 
-        fn form_lifted_matrices(&self) {}
+        fn form_lifted_matrices(&self) {
+            let n = self.A.nrows();
+            let r = self.C.nrows();
+            let m = self.B.ncols();
+
+            // Lifted matrix O
+            let O: Array2<f64> = Array2::zeros((self.f * r, n));
+
+            // for i in range(f):
+            //     if (i == 0):
+            //         powA=A;
+            //     else:
+            //         powA=np.matmul(powA,A)
+            //     O[i*r:(i+1)*r,:]=np.matmul(C,powA)
+
+            // # lifted matrix M
+            // M=np.zeros(shape=(f*r,v*m))
+
+            // for i in range(f):
+            //     # until the control horizon
+            //     if (i<v):
+            //         for j in range(i+1):
+            //             if (j == 0):
+            //                 powA=np.eye(n,n);
+            //             else:
+            //                 powA=np.matmul(powA,A)
+            //             M[i*r:(i+1)*r,(i-j)*m:(i-j+1)*m]=np.matmul(C,np.matmul(powA,B))
+
+            //     # from control horizon until the prediction horizon
+            //     else:
+            //         for j in range(v):
+            //             # here we form the last entry
+            //             if j==0:
+            //                 sumLast=np.zeros(shape=(n,n))
+            //                 for s in range(i-v+2):
+            //                     if (s == 0):
+            //                         powA=np.eye(n,n);
+            //                     else:
+            //                         powA=np.matmul(powA,A)
+            //                     sumLast=sumLast+powA
+            //                 M[i*r:(i+1)*r,(v-1)*m:(v)*m]=np.matmul(C,np.matmul(sumLast,B))
+            //             else:
+            //                 powA=np.matmul(powA,A)
+            //                 M[i*r:(i+1)*r,(v-1-j)*m:(v-j)*m]=np.matmul(C,np.matmul(powA,B))
+
+            // tmp1=np.matmul(M.T,np.matmul(self.W4,M))
+            // tmp2=np.linalg.inv(tmp1+self.W3)
+            // gainMatrix=np.matmul(tmp2,np.matmul(M.T,self.W4))
+
+            // return O,M,gainMatrix
+        }
 
         fn propagate_dynamics(
             &self,
