@@ -279,6 +279,9 @@ mod tests {
         // For a simple test case with horizon of 1, O is equal to A
         assert_eq!(O.shape(), &[f * C.nrows(), A.nrows()]);
         assert_eq!(O, A);
+
+        // For a simple test case with horizon of 1, O is equal to A
+        assert_eq!(M, Array::eye(2));
         
 
         Ok(())
