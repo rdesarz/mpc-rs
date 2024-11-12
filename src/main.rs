@@ -319,7 +319,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let sampling = 0.05;
 
     // Model discretization
-    let I: Array2<f64> = Array::eye(Ac.shape()[0]);
+    let I: Array2<f64> = Array::eye(Ac.nrows());
     let mut A: Array2<f64> = I - sampling * Ac.clone();
     A = A.inv()?;
     let B = A.dot(&(sampling * Bc));
@@ -349,7 +349,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .margin(10)
         .x_label_area_size(30)
         .y_label_area_size(40)
-        .build_cartesian_2d(0..y_test.shape()[1] as i32, min_y..max_y)?;
+        .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
 
     chart.configure_mesh().draw()?;
 
