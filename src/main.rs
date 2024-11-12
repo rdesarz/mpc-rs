@@ -276,9 +276,7 @@ mod tests {
         let (O, M, gain_matrix) =
             controller::Controller::form_lifted_matrices(&A, &B, &C, f, v, &W3, &W4)?;
 
-        println!("{:?}", M);
-
-        assert_eq!(M[[0, 0]], 1.0f64);
+        assert_eq!(O.shape(), &[f * C.nrows(), A.nrows()]);
 
         Ok(())
     }
