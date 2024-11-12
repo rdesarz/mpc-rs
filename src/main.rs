@@ -276,7 +276,10 @@ mod tests {
         let (O, M, gain_matrix) =
             controller::Controller::form_lifted_matrices(&A, &B, &C, f, v, &W3, &W4)?;
 
+        // For a simple test case with horizon of 1, O is equal to A
         assert_eq!(O.shape(), &[f * C.nrows(), A.nrows()]);
+        assert_eq!(O, A);
+        
 
         Ok(())
     }
