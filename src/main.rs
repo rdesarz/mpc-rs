@@ -62,7 +62,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{s, array, Array1, Array2, Axis};
+    use ndarray::{array, s, Array1, Array2, Axis};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -84,7 +84,7 @@ mod controller {
     }
 
     impl Controller {
-        fn form_lifted_matrices(
+        pub fn form_lifted_matrices(
             A: &Array2<f64>,
             B: &Array2<f64>,
             C: &Array2<f64>,
@@ -227,15 +227,15 @@ mod controller {
             let (O, M, gain_matrix) = Self::form_lifted_matrices(A, B, C, f, v, W3, W4)?;
 
             // We store the state vectors of the controlled state trajectory
-            let mut states : Array2<f64> = Array2::zeros((1, 2));
-            states.slice_mut(s![1, ..]).assign(&x0); 
-            
+            let mut states: Array2<f64> = Array2::zeros((1, 2));
+            states.slice_mut(s![1, ..]).assign(&x0);
+
             // We store the computed inputs
-            let inputs: Array2<f64> = array![[]];//A;
+            let inputs: Array2<f64> = array![[]];
 
             // # we store the output vectors of the controlled state trajectory
-            let mut outputs : Array2<f64> = Array2::zeros((1, 2));
-            outputs.slice_mut(s![1, ..]).assign(&(C.dot(&x0))); 
+            let mut outputs: Array2<f64> = Array2::zeros((1, 2));
+            outputs.slice_mut(s![1, ..]).assign(&(C.dot(&x0)));
 
             Ok(Controller {
                 A: A.clone(),
@@ -252,9 +252,35 @@ mod controller {
                 gain_matrix: gain_matrix,
                 states: states,
                 inputs: inputs,
-                outputs: outputs
+                outputs: outputs,
             })
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_form_lifted_matrix() -> Result<(), Box<dyn std::error::Error>> {
+        let A: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        let B: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        let C: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        let f = 1usize;
+        let v = 1usize;
+        let W3: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        let W4: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+
+        let (O, M, gain_matrix) =
+            controller::Controller::form_lifted_matrices(&A, &B, &C, f, v, &W3, &W4)?;
+
+        println!("{:?}", M);
+
+        assert_eq!(M[[0, 0]], 1.0f64);
+
+        Ok(())
     }
 }
 
