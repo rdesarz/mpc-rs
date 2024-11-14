@@ -269,10 +269,10 @@ mod tests {
         let A: Array2<f64> = array![[1.0, 0.0], [0.0, 2.0]];
         let B: Array2<f64> = array![[3.0], [4.0]];
         let C: Array2<f64> = array![[5.0, 6.0]];
-        let f = 1usize;
-        let v = 1usize;
-        let W3: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
-        let W4: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        let f = 3usize; // Prediction horizon
+        let v = 3usize; // Control horizon
+        let W3: Array2<f64> = array![[5.0, -3.0, 0.0], [-3.0, 7.0, -4.0], [0.0, -4.0, 4.0]];
+        let W4: Array2<f64> = array![[5.0, 0.0, 0.0], [6.0, 0.0, 0.0], [7.0, 0.0, 0.0]];
 
         let (O, M, gain_matrix) =
             controller::Controller::form_lifted_matrices(&A, &B, &C, f, v, &W3, &W4)?;
