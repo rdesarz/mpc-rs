@@ -265,9 +265,10 @@ mod tests {
 
     #[test]
     fn test_form_lifted_matrix() -> Result<(), Box<dyn std::error::Error>> {
-        let A: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
-        let B: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
-        let C: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
+        // We want to do a simple test with a state space of two and one control variable. We first start with a one step horizon
+        let A: Array2<f64> = array![[1.0, 0.0], [0.0, 2.0]];
+        let B: Array2<f64> = array![[3.0], [4.0]];
+        let C: Array2<f64> = array![[5.0, 6.0]];
         let f = 1usize;
         let v = 1usize;
         let W3: Array2<f64> = array![[1.0, 0.0], [0.0, 1.0]];
