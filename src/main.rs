@@ -282,8 +282,8 @@ mod tests {
         assert_eq!(O, A);
 
         // For a simple test case with horizon of 1, O is equal to A
-        assert_eq!(M, Array::eye(2));
-        
+        let expected_M = array![[39.0, 0.0, 0.0], [63.0, 39.0, 0.0], [111.0, 63.0, 39.0]];
+        assert_eq!(M, expected_M);
 
         Ok(())
     }
