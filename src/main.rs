@@ -5,31 +5,6 @@ use plotters::prelude::*;
 mod simulator {
     use ndarray::{s, Array1, Array2};
 
-    #[derive(Debug, Copy, Clone)]
-    pub struct TwoWheeledSystem {
-        pub x: f32,
-        pub y: f32,
-        pub yaw: f32,
-        pub v: f32,
-    }
-
-    pub struct Command {
-        pub u1: f32,
-        pub u2: f32,
-    }
-
-    pub fn apply_differential_model(system: &mut TwoWheeledSystem, cmd: &Command, dt: f32) {
-        let dx = system.yaw.cos() * system.v;
-        let dy = system.yaw.sin() * system.v;
-        let dv = cmd.u1;
-        let d_yaw = system.v / 0.25 * cmd.u2.sin();
-
-        system.x += dt * dx;
-        system.y += dt * dy;
-        system.yaw += dt * d_yaw;
-        system.v += dt * dv;
-    }
-
     pub fn system_simulate(
         A: &Array2<f64>,
         B: &Array2<f64>,
