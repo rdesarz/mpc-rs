@@ -358,5 +358,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .border_style(&BLACK)
         .draw()?;
 
+    let mut W1: Array2<f64> = Array2::zeros((v * m, v * m));
+
+    for i in 0..v {
+        if (i == 0) {
+            W1.slice_mut(slice![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(Array2::eye(m));
+        } else {
+            W1.slice_mut(slice![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(Array2::eye(m));
+            W1.slice_mut(slice![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
+                .assign(Array2::eye(m));
+        }
+    }
+
     Ok(())
 }
