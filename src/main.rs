@@ -271,6 +271,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
 
     // Define parameters
+    let f = 20u64;
+    let v = 20u64;
     let m1 = 2.0;
     let m2 = 2.0;
     let k1 = 100.0;
