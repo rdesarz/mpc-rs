@@ -376,7 +376,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let Q0 = 0.0000000011f64;
     let Qother = 0.0001f64;
  
-    let W2 : Array2<f64> = Array2::zeros((v*m,v*m));
+    let mut W2 : Array2<f64> = Array2::zeros((v*m,v*m));
  
     for i in 0..v
     {
