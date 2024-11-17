@@ -390,5 +390,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
+        // W3 matrix
+    let W3 = W1.t().dot(&(W2.dot(&W1)));
+
+    // W4 matrix
+    let mut W4: Array2<f64> = Array2::zeros((f * r, f * r));
+
+    let pred_weight = 10f64;
+
+    for i in 0..f {
+        W4.slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
+            .assign(&pred_weight);
+    }
+
     Ok(())
 }
