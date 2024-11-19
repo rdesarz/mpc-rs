@@ -1,0 +1,18 @@
+version: "3.1"
+services:
+  rust-dev:
+    container_name: rust-dev
+    build:
+      context: .
+      args:
+        C_USER: ${USER}
+        C_UID: 1000
+        C_GID: 1000
+    restart: "unless-stopped"
+    network_mode: "host"
+    privileged: true
+    volumes:
+      - ~/rust_ws:/home/$USER/rust_ws
+    environment:
+      - DISPLAY=${DISPLAY}
+    tty: true
