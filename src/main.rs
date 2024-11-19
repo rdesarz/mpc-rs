@@ -260,11 +260,11 @@ mod tests {
     }
 }
 
-use simulator::system_simulate;
-use std::env;
-use ndarray::{array, Array, Array1, Array2, s};
+use ndarray::{array, s, Array, Array1, Array2};
 use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
+use simulator::system_simulate;
+use std::env;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
