@@ -2,33 +2,33 @@ mod simulator {
     use ndarray::{s, Array1, Array2};
 
     pub fn system_simulate(
-        A: &Array2<f64>,
-        B: &Array2<f64>,
-        C: &Array2<f64>,
-        U: &Array2<f64>,
+        mat_a: &Array2<f64>,
+        mat_b: &Array2<f64>,
+        mat_c: &Array2<f64>,
+        mat_u: &Array2<f64>,
         x0: &Array1<f64>,
     ) -> (Array2<f64>, Array2<f64>) {
-        let sim_time = U.shape()[1];
-        let n = A.shape()[0];
-        let r = C.shape()[0];
-        let mut X = Array2::zeros((n, sim_time + 1));
-        let mut Y = Array2::zeros((r, sim_time));
+        let sim_time = mat_u.shape()[1];
+        let n = mat_a.shape()[0];
+        let r = mat_c.shape()[0];
+        let mut mat_x = Array2::zeros((n, sim_time + 1));
+        let mut mat_y = Array2::zeros((r, sim_time));
         for i in 0..sim_time {
             if i == 0 {
-                X.slice_mut(s![.., i]).assign(&x0);
-                Y.slice_mut(s![.., i]).assign(&(C.dot(x0)));
-                X.slice_mut(s![.., i + 1])
-                    .assign(&(A.dot(x0) + B.dot(&U.slice(s![.., i]))));
+                mat_x.slice_mut(s![.., i]).assign(&x0);
+                mat_y.slice_mut(s![.., i]).assign(&(mat_x.dot(x0)));
+                mat_x.slice_mut(s![.., i + 1])
+                    .assign(&(mat_a.dot(x0) + mat_b.dot(&mat_u.slice(s![.., i]))));
             } else {
-                Y.slice_mut(s![.., i]).assign(&(C.dot(&X.slice(s![.., i]))));
+                mat_y.slice_mut(s![.., i]).assign(&(mat_c.dot(&mat_x.slice(s![.., i]))));
 
-                let X_slice = X.slice(s![.., i]).to_owned();
-                X.slice_mut(s![.., i + 1])
-                    .assign(&(A.dot(&X_slice) + B.dot(&U.slice(s![.., i]))));
+                let mat_x_slice = mat_x.slice(s![.., i]).to_owned();
+                mat_x.slice_mut(s![.., i + 1])
+                    .assign(&(mat_a.dot(&mat_x_slice) + mat_b.dot(&mat_u.slice(s![.., i]))));
             }
         }
 
-        (Y, X)
+        (mat_y, mat_x)
     }
 }
 
