@@ -377,22 +377,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // W2 matrix
     let Q0 = 0.0000000011f64;
     let Qother = 0.0001f64;
- 
-    let mut W2 : Array2<f64> = Array2::zeros((v*m,v*m));
- 
-    for i in 0..v
-    {
-        if i == 0
-        {
-            W2.slice_mut(s![i*m..(i+1)*m,i*m..(i+1)*m]).assign(&Q0);
-        }
-        else
-        {
-            W2.slice_mut(s![i*m..(i+1)*m,i*m..(i+1)*m]).assign(&Qother);
+
+    let mut W2: Array2<f64> = Array2::zeros((v * m, v * m));
+
+    for i in 0..v {
+        if i == 0 {
+            W2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&Q0);
+        } else {
+            W2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&Qother);
         }
     }
 
-        // W3 matrix
+    // W3 matrix
     let W3 = W1.t().dot(&(W2.dot(&W1)));
 
     // W4 matrix
