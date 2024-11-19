@@ -1,7 +1,3 @@
-use ndarray::{array, Array, Array1, Array2};
-use ndarray_linalg::{Eig, Inverse};
-use plotters::prelude::*;
-
 mod simulator {
     use ndarray::{s, Array1, Array2};
 
@@ -266,13 +262,16 @@ mod tests {
 
 use simulator::system_simulate;
 use std::env;
+use ndarray::{array, Array, Array1, Array2, s};
+use ndarray_linalg::{Eig, Inverse};
+use plotters::prelude::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
 
     // Define parameters
-    let f = 20u64;
-    let v = 20u64;
+    let f = 20usize;
+    let v = 20usize;
     let m1 = 2.0;
     let m2 = 2.0;
     let k1 = 100.0;
@@ -289,9 +288,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let Bc = array![[0.0], [0.0], [0.0], [1.0 / m2]];
     let Cc = array![[1.0, 0.0, 0.0, 0.0]];
 
-    let r = 1;
-    let m = 1; // number of inputs and outputs
-    let n = 4; // state dimension
+    let r = 1usize;
+    let m = 1usize; // number of inputs and outputs
+    let n = 4usize; // state dimension
 
     // Discretization constant
     let sampling = 0.05;
@@ -365,18 +364,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for i in 0..v {
         if (i == 0) {
             W1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(Array2::eye(m));
+                .assign(&Array2::eye(m));
         } else {
             W1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(Array2::eye(m));
+                .assign(&Array2::eye(m));
             W1.slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
-                .assign(Array2::eye(m));
+                .assign(&Array2::eye(m));
         }
     }
 
     // W2 matrix
-    let Q0 = 0.0000000011f64;
-    let Qother = 0.0001f64;
+    let Q0 = array![0.0000000011f64];
+    let Qother = array![0.0001f64];
 
     let mut W2: Array2<f64> = Array2::zeros((v * m, v * m));
 
@@ -396,7 +395,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // W4 matrix
     let mut W4: Array2<f64> = Array2::zeros((f * r, f * r));
 
-    let pred_weight = 10f64;
+    let pred_weight = array![10f64];
 
     for i in 0..f {
         W4.slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
