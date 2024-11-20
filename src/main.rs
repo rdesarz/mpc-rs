@@ -37,7 +37,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{array, s, Array1, Array2, Axis};
+    use ndarray::{array, s, Array1, Array2, Axis, arr2};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -181,9 +181,9 @@ mod controller {
             );
 
             // Append the lists
-            // self.states = ndarray::concatenate(Axis(0), &[self.states.view(), state_kp1.view()]).unwrap();
-            // self.outputs = ndarray::concatenate(Axis(0), &[self.outputs.view(), output_k.view()]).unwrap();
-            // self.inputs = ndarray::concatenate(Axis(0), &[self.inputs.view(), input_applied.view()]).unwrap();
+            self.states = ndarray::concatenate(Axis(1), &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()]).unwrap();
+            self.outputs = ndarray::concatenate(Axis(1), &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()]).unwrap();
+            self.inputs = ndarray::concatenate(Axis(1), &[self.inputs.view(), input_applied.insert_axis(Axis(0)).view()]).unwrap();
 
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;
