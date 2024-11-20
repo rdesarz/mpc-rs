@@ -173,9 +173,9 @@ mod controller {
             );
 
             // Append the lists
-            self.states.append(Axis(0), (&state_kp1).into());
-            self.outputs.append(Axis(0), (&output_k).into());
-            self.inputs.append(Axis(0), (&input_applied).into());
+            let _ = self.states.append(Axis(0), (&state_kp1).into());
+            let _ = self.outputs.append(Axis(0), (&output_k).into());
+            let _ = self.inputs.append(Axis(0), (&input_applied).into());
 
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;
@@ -303,8 +303,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mat_c = mat_cc;
 
     // check the eigenvalues
-    let eigen_a = mat_ac.eig()?;
-    let eigen_aid = mat_a.eig()?;
+    let _eigen_a = mat_ac.eig()?;
+    let _eigen_aid = mat_a.eig()?;
 
     let time_sample_test = 200;
 
@@ -313,7 +313,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0_test = Array1::zeros(4);
 
     // // # simulate the discrete-time system
-    let (y_test, x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
+    let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
     // Draw the response
     let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
@@ -390,15 +390,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // W3 matrix
-    let W3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
+    let _mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
 
     // W4 matrix
-    let mut W4: Array2<f64> = Array2::zeros((f * r, f * r));
+    let mut mat_w4: Array2<f64> = Array2::zeros((f * r, f * r));
 
     let pred_weight = array![10f64];
 
     for i in 0..f {
-        W4.slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
+        mat_w4.slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
             .assign(&pred_weight);
     }
 
