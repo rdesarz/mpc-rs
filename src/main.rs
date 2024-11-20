@@ -189,7 +189,7 @@ mod controller {
             self.current_timestep = self.current_timestep + 1;
         }
 
-        fn new(
+        pub fn new(
             mat_a: &Array2<f64>,
             mat_b: &Array2<f64>,
             mat_c: &Array2<f64>,
@@ -274,6 +274,7 @@ use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
 use simulator::system_simulate;
 use std::env;
+use controller::Controller;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
@@ -404,7 +405,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // W3 matrix
-    let _mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
+    let mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
 
     // W4 matrix
     let mut mat_w4: Array2<f64> = Array2::zeros((f * r, f * r));
@@ -421,6 +422,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Define a step trajectory
     let desired_traj : Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+
+    // Set the initial state
+    let x0 = x0_test;
+ 
+    // Create the controller 
+    let mpc = Controller::new(&mat_a, &mat_b, &mat_c, f, v, &mat_w3, &mat_w4,x0,&desired_traj);
  
     Ok(())
 }
