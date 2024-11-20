@@ -17,13 +17,17 @@ mod simulator {
             if i == 0 {
                 mat_x.slice_mut(s![.., i]).assign(&x0);
                 mat_y.slice_mut(s![.., i]).assign(&(mat_x.dot(x0)));
-                mat_x.slice_mut(s![.., i + 1])
+                mat_x
+                    .slice_mut(s![.., i + 1])
                     .assign(&(mat_a.dot(x0) + mat_b.dot(&mat_u.slice(s![.., i]))));
             } else {
-                mat_y.slice_mut(s![.., i]).assign(&(mat_c.dot(&mat_x.slice(s![.., i]))));
+                mat_y
+                    .slice_mut(s![.., i])
+                    .assign(&(mat_c.dot(&mat_x.slice(s![.., i]))));
 
                 let mat_x_slice = mat_x.slice(s![.., i]).to_owned();
-                mat_x.slice_mut(s![.., i + 1])
+                mat_x
+                    .slice_mut(s![.., i + 1])
                     .assign(&(mat_a.dot(&mat_x_slice) + mat_b.dot(&mat_u.slice(s![.., i]))));
             }
         }
@@ -77,7 +81,8 @@ mod controller {
                     pow_a.assign(&(pow_a.dot(mat_a)));
                 }
 
-                mat_o.slice_mut(s![i * r..(i + 1) * r, ..])
+                mat_o
+                    .slice_mut(s![i * r..(i + 1) * r, ..])
                     .assign(&(mat_c.dot(&pow_a)));
             }
 
@@ -94,7 +99,8 @@ mod controller {
                             pow_a.assign(&(pow_a.dot(mat_a)));
                         }
 
-                        mat_m.slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
+                        mat_m
+                            .slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
                             .assign(&(mat_c.dot(&pow_a).dot(mat_b)));
                     }
                 } else {
@@ -112,12 +118,14 @@ mod controller {
                                 sum_last = sum_last + &pow_a;
                             }
 
-                            mat_m.slice_mut(s![i * r..(i + 1) * r, (v - 1) * m..(v) * m])
+                            mat_m
+                                .slice_mut(s![i * r..(i + 1) * r, (v - 1) * m..(v) * m])
                                 .assign(&(mat_c.dot(&sum_last).dot(mat_b)));
                         } else {
                             pow_a.assign(&(pow_a.dot(mat_a)));
 
-                            mat_m.slice_mut(s![i * r..(i + 1) * r, (v - 1 - j) * m..(v - j) * m])
+                            mat_m
+                                .slice_mut(s![i * r..(i + 1) * r, (v - 1 - j) * m..(v - j) * m])
                                 .assign(&(mat_c.dot(&pow_a).dot(mat_b)));
                         }
                     }
@@ -195,7 +203,8 @@ mod controller {
             // Form the lifted system matrices and vectors
             // the gain matrix is used to compute the solution
             // here we pre-compute it to save computational time
-            let (mat_o, mat_m, gain_matrix) = Self::form_lifted_matrices(mat_a, mat_b, mat_c, f, v, mat_w3, mat_w4)?;
+            let (mat_o, mat_m, gain_matrix) =
+                Self::form_lifted_matrices(mat_a, mat_b, mat_c, f, v, mat_w3, mat_w4)?;
 
             // We store the state vectors of the controlled state trajectory
             let mut states: Array2<f64> = Array2::zeros((1, 2));
@@ -363,12 +372,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for i in 0..v {
         if i == 0 {
-            mat_w1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&Array2::eye(m));
         } else {
-            mat_w1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&Array2::eye(m));
-            mat_w1.slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
                 .assign(&Array2::eye(m));
         }
     }
@@ -381,10 +393,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for i in 0..v {
         if i == 0 {
-            mat_w2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            mat_w2
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&mat_q0);
         } else {
-            mat_w2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            mat_w2
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&math_q_other);
         }
     }
@@ -398,7 +412,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pred_weight = array![10f64];
 
     for i in 0..f {
-        mat_w4.slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
+        mat_w4
+            .slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
             .assign(&pred_weight);
     }
 
