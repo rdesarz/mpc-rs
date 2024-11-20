@@ -181,8 +181,8 @@ mod controller {
             );
 
             // Append the lists
-            self.states = ndarray::concatenate(Axis(1), &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()]).unwrap();
-            self.outputs = ndarray::concatenate(Axis(1), &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()]).unwrap();
+            self.states = ndarray::concatenate(Axis(0), &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()]).unwrap();
+            self.outputs = ndarray::concatenate(Axis(0), &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()]).unwrap();
             self.inputs = ndarray::concatenate(Axis(1), &[self.inputs.view(), input_applied.insert_axis(Axis(0)).view()]).unwrap();
 
             // Increment the time step
@@ -214,7 +214,7 @@ mod controller {
             let inputs: Array2<f64> = array![[]];
 
             // # we store the output vectors of the controlled state trajectory
-            let mut outputs: Array2<f64> = Array2::zeros((1, x0.shape()[0]));
+            let mut outputs: Array2<f64> = Array2::zeros((1, mat_c.nrows()));
             outputs.slice_mut(s![0, ..]).assign(&(mat_c.dot(&x0)));
 
             Ok(Controller {
