@@ -141,19 +141,19 @@ mod controller {
 
         fn propagate_dynamics(
             &self,
-            control_input: &Array2<f64>,
+            control_input: &Array1<f64>,
             state: &Array1<f64>,
-        ) -> (Array2<f64>, Array2<f64>) {
-            let mut x_kp1 = Array2::zeros((self.mat_a.shape()[0], 1));
-            let mut y_k = Array2::zeros((self.mat_c.shape()[0], 1));
-
+        ) -> (Array1<f64>, Array1<f64>) {
+            let mut x_kp1 = Array1::zeros(self.mat_a.nrows());
+            let mut y_k = Array1::zeros(self.mat_c.nrows());
+       
             x_kp1.assign(&(self.mat_a.dot(state) + self.mat_b.dot(control_input)));
             y_k.assign(&(self.mat_c.dot(state)));
 
             (x_kp1, y_k)
         }
 
-        fn compute_control_inputs(&mut self) {
+        pub fn compute_control_inputs(&mut self) {
             // Extract the segment of the desired control trajectory
             let desired_ctrl_traj = self
                 .desired_ctrl_traj_total
@@ -171,8 +171,8 @@ mod controller {
 
             // Compute the control sequence
             let input_sequence_computed = self.gain_matrix.dot(&vec_s);
-            let mut input_applied: Array2<f64> = Array2::zeros((1, 1));
-            input_applied[[0, 0]] = input_sequence_computed[[0, 0]];
+            let mut input_applied: Array1<f64> = Array1::zeros(1);
+            input_applied[0] = input_sequence_computed[[0, 0]];
 
             // Compute the next state and output
             let (state_kp1, output_k) = self.propagate_dynamics(
@@ -181,9 +181,9 @@ mod controller {
             );
 
             // Append the lists
-            let _ = self.states.append(Axis(0), (&state_kp1).into());
-            let _ = self.outputs.append(Axis(0), (&output_k).into());
-            let _ = self.inputs.append(Axis(0), (&input_applied).into());
+            // self.states = ndarray::concatenate(Axis(0), &[self.states.view(), state_kp1.view()]).unwrap();
+            // self.outputs = ndarray::concatenate(Axis(0), &[self.outputs.view(), output_k.view()]).unwrap();
+            // self.inputs = ndarray::concatenate(Axis(0), &[self.inputs.view(), input_applied.view()]).unwrap();
 
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;
@@ -270,7 +270,7 @@ mod tests {
 }
 
 use controller::Controller;
-use ndarray::{array, s, Array, Array1, Array2};
+use ndarray::{array, s, Array, Array2};
 use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
 use simulator::system_simulate;
@@ -320,7 +320,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Compute the system's step response
     let input_test = 10.0 * Array2::ones((1, time_sample_test));
-    let x0_test = Array1::zeros(4);
+    let x0_test = Array::zeros(4);
 
     // // # simulate the discrete-time system
     let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
@@ -427,7 +427,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0 = x0_test;
 
     // Create the controller
-    let mpc = Controller::new(
+    let mut mpc = Controller::new(
         &mat_a,
         &mat_b,
         &mat_c,
@@ -437,7 +437,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &mat_w4,
         x0,
         &desired_traj,
-    );
+    )?;
+
+    for i in 0..time_steps - f
+    {
+        mpc.compute_control_inputs();
+    }
 
     Ok(())
 }
