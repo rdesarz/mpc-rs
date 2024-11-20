@@ -269,12 +269,12 @@ mod tests {
     }
 }
 
+use controller::Controller;
 use ndarray::{array, s, Array, Array1, Array2};
 use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
 use simulator::system_simulate;
 use std::env;
-use controller::Controller;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env::set_var("RUST_BACKTRACE", "1");
@@ -421,13 +421,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let time_steps = 300;
 
     // Define a step trajectory
-    let desired_traj : Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+    let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
 
     // Set the initial state
     let x0 = x0_test;
- 
-    // Create the controller 
-    let mpc = Controller::new(&mat_a, &mat_b, &mat_c, f, v, &mat_w3, &mat_w4,x0,&desired_traj);
- 
+
+    // Create the controller
+    let mpc = Controller::new(
+        &mat_a,
+        &mat_b,
+        &mat_c,
+        f,
+        v,
+        &mat_w3,
+        &mat_w4,
+        x0,
+        &desired_traj,
+    );
+
     Ok(())
 }
