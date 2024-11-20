@@ -207,15 +207,15 @@ mod controller {
                 Self::form_lifted_matrices(mat_a, mat_b, mat_c, f, v, mat_w3, mat_w4)?;
 
             // We store the state vectors of the controlled state trajectory
-            let mut states: Array2<f64> = Array2::zeros((1, 2));
-            states.slice_mut(s![1, ..]).assign(&x0);
+            let mut states: Array2<f64> = Array2::zeros((1, x0.shape()[0]));
+            states.slice_mut(s![0, ..]).assign(&x0);
 
             // We store the computed inputs
             let inputs: Array2<f64> = array![[]];
 
             // # we store the output vectors of the controlled state trajectory
-            let mut outputs: Array2<f64> = Array2::zeros((1, 2));
-            outputs.slice_mut(s![1, ..]).assign(&(mat_c.dot(&x0)));
+            let mut outputs: Array2<f64> = Array2::zeros((1, x0.shape()[0]));
+            outputs.slice_mut(s![0, ..]).assign(&(mat_c.dot(&x0)));
 
             Ok(Controller {
                 mat_a: mat_a.clone(),
@@ -326,118 +326,118 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
     // Draw the response
-    // let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
-    // root.fill(&WHITE)?;
+    let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
+    root.fill(&WHITE)?;
 
-    // let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    // let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
-    // let mut chart = ChartBuilder::on(&root)
-    //     .caption("System Output Y", ("sans-serif", 20))
-    //     .margin(10)
-    //     .x_label_area_size(30)
-    //     .y_label_area_size(40)
-    //     .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+    let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
+    let mut chart = ChartBuilder::on(&root)
+        .caption("System Output Y", ("sans-serif", 20))
+        .margin(10)
+        .x_label_area_size(30)
+        .y_label_area_size(40)
+        .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
 
-    // chart.configure_mesh().draw()?;
+    chart.configure_mesh().draw()?;
 
-    // // Plot input
-    // let series_input: Vec<(i32, f64)> = input_test
-    //     .row(0)
-    //     .iter()
-    //     .enumerate()
-    //     .map(|(i, &val)| (i as i32, val as f64))
-    //     .collect();
+    // Plot input
+    let series_input: Vec<(i32, f64)> = input_test
+        .row(0)
+        .iter()
+        .enumerate()
+        .map(|(i, &val)| (i as i32, val as f64))
+        .collect();
 
-    // chart
-    //     .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
-    //     .label(format!("Output {}", 0))
-    //     .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+    chart
+        .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
+        .label(format!("Output {}", 0))
+        .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
-    // // Plot system response
-    // let series_y: Vec<(i32, f64)> = y_test
-    //     .row(0)
-    //     .iter()
-    //     .enumerate()
-    //     .map(|(i, &val)| (i as i32, val as f64))
-    //     .collect();
+    // Plot system response
+    let series_y: Vec<(i32, f64)> = y_test
+        .row(0)
+        .iter()
+        .enumerate()
+        .map(|(i, &val)| (i as i32, val as f64))
+        .collect();
 
-    // chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
+    chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
 
-    // chart
-    //     .configure_series_labels()
-    //     .background_style(&WHITE)
-    //     .border_style(&BLACK)
-    //     .draw()?;
+    chart
+        .configure_series_labels()
+        .background_style(&WHITE)
+        .border_style(&BLACK)
+        .draw()?;
 
-    // let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
+    let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
 
-    // for i in 0..v {
-    //     if i == 0 {
-    //         mat_w1
-    //             .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //             .assign(&Array2::eye(m));
-    //     } else {
-    //         mat_w1
-    //             .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //             .assign(&Array2::eye(m));
-    //         mat_w1
-    //             .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
-    //             .assign(&Array2::eye(m));
-    //     }
-    // }
+    for i in 0..v {
+        if i == 0 {
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&Array2::eye(m));
+        } else {
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&Array2::eye(m));
+            mat_w1
+                .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
+                .assign(&Array2::eye(m));
+        }
+    }
 
-    // // mat_w2 matrix
-    // let mat_q0 = array![0.0000000011f64];
-    // let math_q_other = array![0.0001f64];
+    // mat_w2 matrix
+    let mat_q0 = array![0.0000000011f64];
+    let math_q_other = array![0.0001f64];
 
-    // let mut mat_w2: Array2<f64> = Array2::zeros((v * m, v * m));
+    let mut mat_w2: Array2<f64> = Array2::zeros((v * m, v * m));
 
-    // for i in 0..v {
-    //     if i == 0 {
-    //         mat_w2
-    //             .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //             .assign(&mat_q0);
-    //     } else {
-    //         mat_w2
-    //             .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //             .assign(&math_q_other);
-    //     }
-    // }
+    for i in 0..v {
+        if i == 0 {
+            mat_w2
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&mat_q0);
+        } else {
+            mat_w2
+                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&math_q_other);
+        }
+    }
 
-    // // W3 matrix
-    // let mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
+    // W3 matrix
+    let mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
 
-    // // W4 matrix
-    // let mut mat_w4: Array2<f64> = Array2::zeros((f * r, f * r));
+    // W4 matrix
+    let mut mat_w4: Array2<f64> = Array2::zeros((f * r, f * r));
 
-    // let pred_weight = array![10f64];
+    let pred_weight = array![10f64];
 
-    // for i in 0..f {
-    //     mat_w4
-    //         .slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
-    //         .assign(&pred_weight);
-    // }
+    for i in 0..f {
+        mat_w4
+            .slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
+            .assign(&pred_weight);
+    }
 
-    // let time_steps = 300;
+    let time_steps = 300;
 
-    // // Define a step trajectory
-    // let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+    // Define a step trajectory
+    let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
 
-    // // Set the initial state
-    // let x0 = x0_test;
+    // Set the initial state
+    let x0 = x0_test;
 
-    // // Create the controller
-    // let mpc = Controller::new(
-    //     &mat_a,
-    //     &mat_b,
-    //     &mat_c,
-    //     f,
-    //     v,
-    //     &mat_w3,
-    //     &mat_w4,
-    //     x0,
-    //     &desired_traj,
-    // );
+    // Create the controller
+    let mpc = Controller::new(
+        &mat_a,
+        &mat_b,
+        &mat_c,
+        f,
+        v,
+        &mat_w3,
+        &mat_w4,
+        x0,
+        &desired_traj,
+    );
 
     Ok(())
 }
