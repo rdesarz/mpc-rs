@@ -279,32 +279,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let d1 = 1.0;
     let d2 = 5.0;
     // Define the continuous-time system matrices
-    let Ac = array![
+    let mat_ac = array![
         [0.0, 1.0, 0.0, 0.0],
         [-(k1 + k2) / m1, -(d1 + d2) / m1, k2 / m1, d2 / m1],
         [0.0, 0.0, 0.0, 1.0],
         [k2 / m2, d2 / m2, -k2 / m2, -d2 / m2]
     ];
-    let Bc = array![[0.0], [0.0], [0.0], [1.0 / m2]];
-    let Cc = array![[1.0, 0.0, 0.0, 0.0]];
+    let mat_bc = array![[0.0], [0.0], [0.0], [1.0 / m2]];
+    let mat_cc = array![[1.0, 0.0, 0.0, 0.0]];
 
     let r = 1usize;
     let m = 1usize; // number of inputs and outputs
-    let n = 4usize; // state dimension
+    let _n = 4usize; // state dimension
 
     // Discretization constant
     let sampling = 0.05;
 
     // Model discretization
-    let I: Array2<f64> = Array::eye(Ac.nrows());
-    let mut A: Array2<f64> = I - sampling * Ac.clone();
-    A = A.inv()?;
-    let B = A.dot(&(sampling * Bc));
-    let C = Cc;
+    let mat_i: Array2<f64> = Array::eye(mat_ac.nrows());
+    let mut mat_a: Array2<f64> = mat_i - sampling * mat_ac.clone();
+    mat_a = mat_a.inv()?;
+    let mat_b = mat_a.dot(&(sampling * mat_bc));
+    let mat_c = mat_cc;
 
     // check the eigenvalues
-    let eigen_A = Ac.eig()?;
-    let eigen_Aid = A.eig()?;
+    let eigen_a = mat_ac.eig()?;
+    let eigen_aid = mat_a.eig()?;
 
     let time_sample_test = 200;
 
@@ -313,7 +313,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0_test = Array1::zeros(4);
 
     // // # simulate the discrete-time system
-    let (y_test, x_test) = system_simulate(&A, &B, &C, &input_test, &x0_test);
+    let (y_test, x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
     // Draw the response
     let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
@@ -359,38 +359,38 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .border_style(&BLACK)
         .draw()?;
 
-    let mut W1: Array2<f64> = Array2::zeros((v * m, v * m));
+    let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
 
     for i in 0..v {
-        if (i == 0) {
-            W1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+        if i == 0 {
+            mat_w1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&Array2::eye(m));
         } else {
-            W1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            mat_w1.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
                 .assign(&Array2::eye(m));
-            W1.slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
+            mat_w1.slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
                 .assign(&Array2::eye(m));
         }
     }
 
-    // W2 matrix
-    let Q0 = array![0.0000000011f64];
-    let Qother = array![0.0001f64];
+    // mat_w2 matrix
+    let mat_q0 = array![0.0000000011f64];
+    let math_q_other = array![0.0001f64];
 
-    let mut W2: Array2<f64> = Array2::zeros((v * m, v * m));
+    let mut mat_w2: Array2<f64> = Array2::zeros((v * m, v * m));
 
     for i in 0..v {
         if i == 0 {
-            W2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&Q0);
+            mat_w2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&mat_q0);
         } else {
-            W2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&Qother);
+            mat_w2.slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+                .assign(&math_q_other);
         }
     }
 
     // W3 matrix
-    let W3 = W1.t().dot(&(W2.dot(&W1)));
+    let W3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
 
     // W4 matrix
     let mut W4: Array2<f64> = Array2::zeros((f * r, f * r));
