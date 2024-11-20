@@ -417,5 +417,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .assign(&pred_weight);
     }
 
+    let time_steps = 300;
+
+    // Define a step trajectory
+    let desired_traj : Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+ 
     Ok(())
 }
