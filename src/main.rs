@@ -446,12 +446,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         mpc.compute_control_inputs();
     }
 
+
     {
         let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
     
-        let max_y = mpc.outputs.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        let min_y = mpc.outputs.iter().cloned().fold(f64::INFINITY, f64::min);
+        let max_y = mpc.inputs.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let min_y = mpc.inputs.iter().cloned().fold(f64::INFINITY, f64::min);
         let mut chart = ChartBuilder::on(&root)
             .caption("System Output Y", ("sans-serif", 20))
             .margin(10)
@@ -462,17 +463,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart.configure_mesh().draw()?;
     
         // Plot input
-        // let inputs_series: Vec<(i32, f64)> = mpc.inputs
-        //     .row(0)
-        //     .iter()
-        //     .enumerate()
-        //     .map(|(i, &val)| (i as i32, val as f64))
-        //     .collect();
-    
-        // chart
-        //     .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
-        //     .label(format!("Output {}", 0))
-            // .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+        let inputs_series: Vec<(i32, f64)> = mpc.inputs
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
+
+        chart
+            .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
+            .label(format!("Output {}", 0))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
     
         // Plot system response
         let outputs_serie: Vec<(i32, f64)> = mpc.outputs
