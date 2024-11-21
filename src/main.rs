@@ -48,14 +48,14 @@ mod controller {
         v: usize,
         mat_w3: Array2<f64>,
         mat_w4: Array2<f64>,
-        desired_ctrl_traj_total: Array2<f64>,
         current_timestep: usize,
         mat_o: Array2<f64>,
         mat_m: Array2<f64>,
         gain_matrix: Array2<f64>,
         states: Array2<f64>,
-        outputs: Array2<f64>,
-        inputs: Array2<f64>,
+        pub desired_ctrl_traj_total: Array2<f64>,
+        pub outputs: Array2<f64>,
+        pub inputs: Array2<f64>,
     }
 
     impl Controller {
@@ -326,48 +326,50 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
     // Draw the response
-    let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
-    let mut chart = ChartBuilder::on(&root)
-        .caption("System Output Y", ("sans-serif", 20))
-        .margin(10)
-        .x_label_area_size(30)
-        .y_label_area_size(40)
-        .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
-
-    chart.configure_mesh().draw()?;
-
-    // Plot input
-    let series_input: Vec<(i32, f64)> = input_test
-        .row(0)
-        .iter()
-        .enumerate()
-        .map(|(i, &val)| (i as i32, val as f64))
-        .collect();
-
-    chart
-        .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
-        .label(format!("Output {}", 0))
-        .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
-
-    // Plot system response
-    let series_y: Vec<(i32, f64)> = y_test
-        .row(0)
-        .iter()
-        .enumerate()
-        .map(|(i, &val)| (i as i32, val as f64))
-        .collect();
-
-    chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
-
-    chart
-        .configure_series_labels()
-        .background_style(&WHITE)
-        .border_style(&BLACK)
-        .draw()?;
+    {
+        let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
+        root.fill(&WHITE)?;
+    
+        let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
+        let mut chart = ChartBuilder::on(&root)
+            .caption("System Output Y", ("sans-serif", 20))
+            .margin(10)
+            .x_label_area_size(30)
+            .y_label_area_size(40)
+            .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+    
+        chart.configure_mesh().draw()?;
+    
+        // Plot input
+        let series_input: Vec<(i32, f64)> = input_test
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
+    
+        chart
+            .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
+            .label(format!("Output {}", 0))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+    
+        // Plot system response
+        let series_y: Vec<(i32, f64)> = y_test
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
+    
+        chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
+    
+        chart
+            .configure_series_labels()
+            .background_style(&WHITE)
+            .border_style(&BLACK)
+            .draw()?;
+    }
 
     let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
 
@@ -444,5 +446,57 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         mpc.compute_control_inputs();
     }
 
+    {
+        let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
+        root.fill(&WHITE)?;
+    
+        let max_y = mpc.outputs.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let min_y = mpc.outputs.iter().cloned().fold(f64::INFINITY, f64::min);
+        let mut chart = ChartBuilder::on(&root)
+            .caption("System Output Y", ("sans-serif", 20))
+            .margin(10)
+            .x_label_area_size(30)
+            .y_label_area_size(40)
+            .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+    
+        chart.configure_mesh().draw()?;
+    
+        // Plot input
+        // let inputs_series: Vec<(i32, f64)> = mpc.inputs
+        //     .row(0)
+        //     .iter()
+        //     .enumerate()
+        //     .map(|(i, &val)| (i as i32, val as f64))
+        //     .collect();
+    
+        // chart
+        //     .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
+        //     .label(format!("Output {}", 0))
+            // .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+    
+        // Plot system response
+        let outputs_serie: Vec<(i32, f64)> = mpc.outputs
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
+
+        chart.draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?;
+
+        let traj_series: Vec<(i32, f64)> = mpc.desired_ctrl_traj_total
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
+
+        chart.draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?;
+   
+        chart
+            .configure_series_labels()
+            .background_style(&WHITE)
+            .border_style(&BLACK)
+            .draw()?;
+    }
+        
     Ok(())
 }
