@@ -97,7 +97,7 @@ mod controller {
 
                         mat_m
                             .slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
-                            .assign(&(mat_c.dot(&pow_a).dot(mat_b)));
+                            .assign(&(mat_c.dot(&(pow_a.dot(mat_b)))));
                     }
                 } else {
                     for j in 0..v {
@@ -116,21 +116,21 @@ mod controller {
 
                             mat_m
                                 .slice_mut(s![i * r..(i + 1) * r, (v - 1) * m..(v) * m])
-                                .assign(&(mat_c.dot(&sum_last).dot(mat_b)));
+                                .assign(&(mat_c.dot(&(sum_last.dot(mat_b)))));
                         } else {
                             pow_a.assign(&(pow_a.dot(mat_a)));
 
                             mat_m
                                 .slice_mut(s![i * r..(i + 1) * r, (v - 1 - j) * m..(v - j) * m])
-                                .assign(&(mat_c.dot(&pow_a).dot(mat_b)));
+                                .assign(&(mat_c.dot(&(pow_a.dot(mat_b)))));
                         }
                     }
                 }
             }
 
-            let tmp1 = mat_m.t().dot(mat_w4).dot(&mat_m);
+            let tmp1 = mat_m.t().dot(&(mat_w4.dot(&mat_m)));
             let tmp2: Array2<f64> = (tmp1 + mat_w3).to_owned().inv()?;
-            let gain_matrix = tmp2.dot(&mat_m.t()).dot(mat_w4);
+            let gain_matrix = tmp2.dot(&(mat_m.t().dot(mat_w4)));
 
             Ok((mat_o, mat_m, gain_matrix))
         }
@@ -182,11 +182,13 @@ mod controller {
                 &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()],
             )
             .unwrap();
+
             self.outputs = ndarray::concatenate(
                 Axis(0),
                 &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()],
             )
             .unwrap();
+
             self.inputs = ndarray::concatenate(
                 Axis(1),
                 &[
@@ -419,8 +421,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
             .assign(&pred_weight);
     }
-
-    println!("{:?}", mat_w4);
 
     let time_steps = 300;
 
