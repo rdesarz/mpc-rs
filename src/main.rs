@@ -37,7 +37,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{arr2, array, s, Array1, Array2, Axis};
+    use ndarray::{array, s, Array1, Array2, Axis};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -45,12 +45,8 @@ mod controller {
         mat_b: Array2<f64>,
         mat_c: Array2<f64>,
         f: usize,
-        v: usize,
-        mat_w3: Array2<f64>,
-        mat_w4: Array2<f64>,
         current_timestep: usize,
         mat_o: Array2<f64>,
-        mat_m: Array2<f64>,
         gain_matrix: Array2<f64>,
         states: Array2<f64>,
         pub desired_ctrl_traj_total: Array2<f64>,
@@ -218,7 +214,7 @@ mod controller {
             // Form the lifted system matrices and vectors
             // the gain matrix is used to compute the solution
             // here we pre-compute it to save computational time
-            let (mat_o, mat_m, gain_matrix) =
+            let (mat_o, _, gain_matrix) =
                 Self::form_lifted_matrices(mat_a, mat_b, mat_c, f, v, mat_w3, mat_w4)?;
 
             // We store the state vectors of the controlled state trajectory
@@ -237,13 +233,9 @@ mod controller {
                 mat_b: mat_b.clone(),
                 mat_c: mat_c.clone(),
                 f: f,
-                v: v,
-                mat_w3: mat_w3.clone(),
-                mat_w4: mat_w4.clone(),
                 desired_ctrl_traj_total: desired_ctrl_traj.clone(),
                 current_timestep: 0,
                 mat_o: mat_o,
-                mat_m: mat_m,
                 gain_matrix: gain_matrix,
                 states: states,
                 inputs: inputs,
@@ -428,6 +420,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .assign(&pred_weight);
     }
 
+    println!("{:?}", mat_w4);
+
     let time_steps = 300;
 
     // Define a step trajectory
@@ -449,7 +443,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &desired_traj,
     )?;
 
-    for i in 0..time_steps - f {
+    for _ in 0..time_steps - f {
         mpc.compute_control_inputs();
     }
 
