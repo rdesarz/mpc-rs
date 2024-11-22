@@ -473,7 +473,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         chart
             .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
-            .label(format!("Output {}", 0))
+            .label(format!("Input"))
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
         // Plot system response
@@ -484,7 +484,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|(i, &val)| (i as i32, val as f64))
             .collect();
 
-        chart.draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?;
+        chart
+            .draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?
+            .label(format!("Output"))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 40, y)], &Palette99::pick(1)));
 
         let traj_series: Vec<(i32, f64)> = mpc
             .desired_ctrl_traj_total
@@ -493,7 +496,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map(|(i, &val)| (i as i32, val as f64))
             .collect();
 
-        chart.draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?;
+        chart
+            .draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?
+            .label(format!("Desired trajectory"))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 60, y)], &Palette99::pick(2)));
 
         chart
             .configure_series_labels()
