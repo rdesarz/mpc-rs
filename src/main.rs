@@ -203,9 +203,9 @@ mod controller {
         }
 
         pub fn new(
-            mat_a: &Array2<f64>,
-            mat_b: &Array2<f64>,
-            mat_c: &Array2<f64>,
+            mat_a: Array2<f64>,
+            mat_b: Array2<f64>,
+            mat_c: Array2<f64>,
             f: usize,
             v: usize,
             mat_w3: &Array2<f64>,
@@ -217,7 +217,7 @@ mod controller {
             // the gain matrix is used to compute the solution
             // here we pre-compute it to save computational time
             let (mat_o, _, gain_matrix) =
-                Self::form_lifted_matrices(mat_a, mat_b, mat_c, f, v, mat_w3, mat_w4)?;
+                Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
 
             // We store the state vectors of the controlled state trajectory
             let mut states: Array2<f64> = Array2::zeros((1, x0.shape()[0]));
@@ -231,9 +231,9 @@ mod controller {
             outputs.slice_mut(s![0, ..]).assign(&(mat_c.dot(&x0)));
 
             Ok(Controller {
-                mat_a: mat_a.clone(),
-                mat_b: mat_b.clone(),
-                mat_c: mat_c.clone(),
+                mat_a: mat_a,
+                mat_b: mat_b,
+                mat_c: mat_c,
                 f: f,
                 desired_ctrl_traj_total: desired_ctrl_traj.clone(),
                 current_timestep: 0,
@@ -432,9 +432,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create the controller
     let mut mpc = Controller::new(
-        &mat_a,
-        &mat_b,
-        &mat_c,
+        mat_a,
+        mat_b,
+        mat_c,
         f,
         v,
         &mat_w3,
