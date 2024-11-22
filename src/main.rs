@@ -37,7 +37,7 @@ mod simulator {
 }
 
 mod controller {
-    use ndarray::{array, s, Array1, Array2, Axis, arr2};
+    use ndarray::{arr2, array, s, Array1, Array2, Axis};
     use ndarray_linalg::Inverse;
 
     pub struct Controller {
@@ -146,7 +146,7 @@ mod controller {
         ) -> (Array1<f64>, Array1<f64>) {
             let mut x_kp1 = Array1::zeros(self.mat_a.nrows());
             let mut y_k = Array1::zeros(self.mat_c.nrows());
-       
+
             x_kp1.assign(&(self.mat_a.dot(state) + self.mat_b.dot(control_input)));
             y_k.assign(&(self.mat_c.dot(state)));
 
@@ -181,9 +181,24 @@ mod controller {
             );
 
             // Append the lists
-            self.states = ndarray::concatenate(Axis(0), &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()]).unwrap();
-            self.outputs = ndarray::concatenate(Axis(0), &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()]).unwrap();
-            self.inputs = ndarray::concatenate(Axis(1), &[self.inputs.view(), input_applied.insert_axis(Axis(0)).view()]).unwrap();
+            self.states = ndarray::concatenate(
+                Axis(0),
+                &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()],
+            )
+            .unwrap();
+            self.outputs = ndarray::concatenate(
+                Axis(0),
+                &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()],
+            )
+            .unwrap();
+            self.inputs = ndarray::concatenate(
+                Axis(1),
+                &[
+                    self.inputs.view(),
+                    input_applied.insert_axis(Axis(0)).view(),
+                ],
+            )
+            .unwrap();
 
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;
@@ -329,7 +344,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
-    
+
         let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
         let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
         let mut chart = ChartBuilder::on(&root)
@@ -338,9 +353,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(30)
             .y_label_area_size(40)
             .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
-    
+
         chart.configure_mesh().draw()?;
-    
+
         // Plot input
         let series_input: Vec<(i32, f64)> = input_test
             .row(0)
@@ -348,12 +363,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
             .collect();
-    
+
         chart
             .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
             .label(format!("Output {}", 0))
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
-    
+
         // Plot system response
         let series_y: Vec<(i32, f64)> = y_test
             .row(0)
@@ -361,9 +376,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
             .collect();
-    
+
         chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
-    
+
         chart
             .configure_series_labels()
             .background_style(&WHITE)
@@ -371,39 +386,32 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .draw()?;
     }
 
+    // W1 matrix
     let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
 
-    for i in 0..v {
-        if i == 0 {
-            mat_w1
-                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&Array2::eye(m));
-        } else {
-            mat_w1
-                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&Array2::eye(m));
-            mat_w1
-                .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
-                .assign(&Array2::eye(m));
-        }
+    mat_w1.slice_mut(s![0..m, 0..m]).assign(&Array2::eye(m));
+
+    for i in 1..v {
+        mat_w1
+            .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            .assign(&Array2::eye(m));
+        mat_w1
+            .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
+            .assign(&(-1.0 * Array2::eye(m)));
     }
 
-    // mat_w2 matrix
+    // W2 matrix
     let mat_q0 = array![0.0000000011f64];
     let math_q_other = array![0.0001f64];
 
     let mut mat_w2: Array2<f64> = Array2::zeros((v * m, v * m));
 
-    for i in 0..v {
-        if i == 0 {
-            mat_w2
-                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&mat_q0);
-        } else {
-            mat_w2
-                .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-                .assign(&math_q_other);
-        }
+    mat_w2.slice_mut(s![0..m, 0..m]).assign(&mat_q0);
+
+    for i in 1..v {
+        mat_w2
+            .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
+            .assign(&math_q_other);
     }
 
     // W3 matrix
@@ -441,16 +449,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         &desired_traj,
     )?;
 
-    for i in 0..time_steps - f
-    {
+    for i in 0..time_steps - f {
         mpc.compute_control_inputs();
     }
-
 
     {
         let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
-    
+
         let max_y = mpc.inputs.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
         let min_y = mpc.inputs.iter().cloned().fold(f64::INFINITY, f64::min);
         let mut chart = ChartBuilder::on(&root)
@@ -459,11 +465,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .x_label_area_size(30)
             .y_label_area_size(40)
             .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
-    
+
         chart.configure_mesh().draw()?;
-    
+
         // Plot input
-        let inputs_series: Vec<(i32, f64)> = mpc.inputs
+        let inputs_series: Vec<(i32, f64)> = mpc
+            .inputs
             .row(0)
             .iter()
             .enumerate()
@@ -474,9 +481,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
             .label(format!("Output {}", 0))
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
-    
+
         // Plot system response
-        let outputs_serie: Vec<(i32, f64)> = mpc.outputs
+        let outputs_serie: Vec<(i32, f64)> = mpc
+            .outputs
             .iter()
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
@@ -484,20 +492,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         chart.draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?;
 
-        let traj_series: Vec<(i32, f64)> = mpc.desired_ctrl_traj_total
+        let traj_series: Vec<(i32, f64)> = mpc
+            .desired_ctrl_traj_total
             .iter()
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
             .collect();
 
         chart.draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?;
-   
+
         chart
             .configure_series_labels()
             .background_style(&WHITE)
             .border_style(&BLACK)
             .draw()?;
     }
-        
+
     Ok(())
 }
