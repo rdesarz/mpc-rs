@@ -274,12 +274,12 @@ mod tests {
         let expected_mat_m = array![[39.0, 0.0, 0.0], [63.0, 39.0, 0.0], [111.0, 63.0, 39.0]];
         assert_eq!(mat_m, expected_mat_m);
 
-        // let expected_gain_matrix = array![
-        //     [0.02564045344996876, 0.0, 0.0],
-        //     [0.03269213603500207, 0.0, 0.0],
-        //     [0.034215165580676776, 0.0, 0.0]
-        // ];
-        // assert_eq!(gain_matrix, expected_gain_matrix);
+        let expected_gain_matrix = array![
+            [0.02564045344996876, 0.0, 0.0],
+            [0.03269213603500207, 0.0, 0.0],
+            [0.034215165580676776, 0.0, 0.0]
+        ];
+        assert_eq!(gain_matrix, expected_gain_matrix);
 
         Ok(())
     }
