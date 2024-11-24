@@ -254,7 +254,6 @@ mod tests {
 
     #[test]
     fn test_form_lifted_matrix() -> Result<(), Box<dyn std::error::Error>> {
-        env::set_var("RUST_BACKTRACE", "1");
         // We want to do a simple test with a state space of two and one control variable. We first start with a one step horizon
         let mat_a: Array2<f64> = array![[1.0, 0.0], [0.0, 2.0]];
         let mat_b: Array2<f64> = array![[3.0], [4.0]];
