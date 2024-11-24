@@ -282,6 +282,11 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_controller_creation() -> Result<(), Box<dyn std::error::Error>> {
+        // TODO: implement
+    }
 }
 
 use controller::Controller;
