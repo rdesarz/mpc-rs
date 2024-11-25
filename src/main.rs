@@ -48,7 +48,7 @@ mod controller {
         current_timestep: usize,
         mat_o: Array2<f64>,
         gain_matrix: Array2<f64>,
-        states: Array2<f64>,
+        pub states: Array2<f64>,
         pub desired_ctrl_traj_total: Array2<f64>,
         pub outputs: Array2<f64>,
         pub inputs: Array2<f64>,
@@ -285,6 +285,43 @@ mod tests {
 
     #[test]
     fn test_controller_creation() -> Result<(), Box<dyn std::error::Error>> {
+        // Define a step trajectory
+        let desired_traj: Array2<f64> = 0.3 * Array2::ones((100, 1));
+
+        // Set the initial state
+        let x0 = Array::ones(2);
+
+        // We want to do a simple test with a state space of two and one control variable. We first start with a one step horizon
+        let mat_a: Array2<f64> = array![[1.0, 0.0], [0.0, 2.0]];
+        let mat_b: Array2<f64> = array![[3.0], [4.0]];
+        let mat_c: Array2<f64> = array![[5.0, 6.0]];
+        let f = 3usize; // Prediction horizon
+        let v = 3usize; // Control horizon
+        let mat_w3: Array2<f64> = array![[5.0, -3.0, 0.0], [-3.0, 7.0, -4.0], [0.0, -4.0, 4.0]];
+        let mat_w4: Array2<f64> = array![[5.0, 0.0, 0.0], [6.0, 0.0, 0.0], [7.0, 0.0, 0.0]];
+
+        // Create the controller
+        let mpc = Controller::new(
+            mat_a,
+            mat_b,
+            mat_c,
+            f,
+            v,
+            &mat_w3,
+            &mat_w4,
+            x0,
+            &desired_traj,
+        )?;
+
+        // State is equal to initial state
+        assert_eq!(mpc.states, array![[1.0, 1.0]]);
+        
+        // No input stored after initialisation
+        assert_eq!(mpc.inputs, array![[]]);
+
+        // First output is state times output matrix
+        assert_eq!(mpc.outputs, array![[11.0]]);
+
         Ok(())
     }
 }
