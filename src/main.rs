@@ -160,10 +160,10 @@ mod controller {
                 .to_owned();
 
             // Compute the vector s
-            let vec_s = desired_ctrl_traj
+            let vec_s = (desired_ctrl_traj.t().to_owned()
                 - self
                     .mat_o
-                    .dot(&self.states.slice(s![self.current_timestep, ..]));
+                    .dot(&self.states.slice(s![self.current_timestep, ..]))).t().to_owned();
 
             // Compute the control sequence
             let input_sequence_computed = self.gain_matrix.dot(&vec_s);
