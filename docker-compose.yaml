@@ -12,7 +12,7 @@ services:
     network_mode: "host"
     privileged: true
     volumes:
-      - ~/rust_ws:/home/$USER/rust_ws
+      - ~/.ssh:/home/$USER/.ssh
     environment:
       - DISPLAY=${DISPLAY}
     tty: true
