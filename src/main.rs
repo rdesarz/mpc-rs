@@ -510,7 +510,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let time_steps = 300;
 
     // Define a step trajectory
-    let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+    // let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
+
+    // Define a pulse trajectory
+    let mut desired_traj: Array2<f64> = Array2::zeros((time_steps, 1));
+    desired_traj.slice_mut(s![0..100,..]).assign(&Array2::ones((100, 1)));
+    desired_traj.slice_mut(s![200..,..]).assign(&Array2::ones((100, 1)));
 
     // Set the initial state
     let x0 = x0_test;
