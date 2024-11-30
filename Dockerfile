@@ -10,6 +10,7 @@ RUN apt-get update \
         liblapack-dev \
         gfortran \
         build-essential \
+        sudo \
         npm
 
 # Setup user
@@ -22,6 +23,9 @@ RUN npm install npm@latest -g
 
 # Install rust wasm
 RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+
+# Install cargo generate
+RUN cargo install cargo-generate
 
 # Copy the project inside the image
 COPY --chown=$C_UID:$C_GID . /home/$C_USER/mpc-rs
