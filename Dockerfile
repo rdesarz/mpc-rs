@@ -16,6 +16,8 @@ RUN groupadd -g $C_GID $C_USER && \
     useradd -m -d /home/$C_USER -g $C_GID -s /bin/bash -u $C_UID $C_USER && \
     adduser $C_USER sudo
 
+RUN npm install npm@latest -g
+
 COPY --chown=$C_UID:$C_GID . /home/$C_USER/mpc-rs
 
 USER $C_USER
