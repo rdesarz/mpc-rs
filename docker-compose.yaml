@@ -4,15 +4,11 @@ services:
     container_name: rust-dev
     build:
       context: .
-      args:
-        C_USER: ${USER}
-        C_UID: 1000
-        C_GID: 1000
     restart: "unless-stopped"
     network_mode: "host"
     privileged: true
     volumes:
-      - ~/.ssh:/home/$USER/.ssh
+      - ~/.ssh:/root/.ssh
     environment:
       - DISPLAY=${DISPLAY}
     tty: true
