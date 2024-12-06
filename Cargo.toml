@@ -1,5 +1,5 @@
 [package]
-name = "mpc_rust"
+name = "mpc-rs"
 version = "0.1.0"
 edition = "2021"
 
