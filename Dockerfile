@@ -4,6 +4,7 @@ RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get install -y --allow-unauthenticated --no-install-recommends \
         liblapack-dev \
+        libopenblas-dev \
         gfortran \
         build-essential \
         sudo \
