@@ -36,7 +36,7 @@ mod simulator {
     }
 }
 
-use crate::mpc::controller::Controller;
+use mpc_rs::mpc::controller::Controller;
 use ndarray::{array, s, Array, Array2};
 use ndarray_linalg::{Eig, Inverse};
 use plotters::prelude::*;
