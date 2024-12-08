@@ -10,6 +10,9 @@ RUN apt-get update \
         sudo \
         npm
 
+# Install rustfmt
+RUN rustup component add rustfmt
+
 # Make sure latest version of npm is installed
 RUN npm install npm@latest -g
 
