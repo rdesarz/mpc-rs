@@ -1,6 +1,5 @@
 
-
-    use ndarray::{array, s, Array1, Array2, Axis};
+use ndarray::{array, s, Array1, Array2, Axis};
 use ndarray_linalg::Inverse;
 
 pub struct Controller {
