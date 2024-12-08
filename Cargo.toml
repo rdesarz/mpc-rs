@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-argmin = "0.10.0"
 plotters = "0.3.3"
 ndarray = "0.15" 
 ndarray-linalg = { version = "0.16" , features=["openblas-system"] }
