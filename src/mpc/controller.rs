@@ -15,85 +15,85 @@ pub struct Controller {
 }
 
 impl Controller {
-    // pub fn form_lifted_matrices(
-    //     mat_a: &na::DMatrix<f64>,
-    //     mat_b: &na::DMatrix<f64>,
-    //     mat_c: &na::DMatrix<f64>,
-    //     f: usize,
-    //     v: usize,
-    //     mat_w3: &na::DMatrix<f64>,
-    //     mat_w4: &na::DMatrix<f64>,
-    // ) -> Result<(na::DMatrix<f64>, na::DMatrix<f64>, na::DMatrix<f64>), Box<dyn std::error::Error>> {
-    //     let n = mat_a.nrows();
-    //     let r = mat_c.nrows();
-    //     let m = mat_b.ncols();
+    pub fn form_lifted_matrices(
+        mat_a: &na::DMatrix<f64>,
+        mat_b: &na::DMatrix<f64>,
+        mat_c: &na::DMatrix<f64>,
+        f: usize,
+        v: usize,
+        mat_w3: &na::DMatrix<f64>,
+        mat_w4: &na::DMatrix<f64>,
+    ) -> Result<(na::DMatrix<f64>, na::DMatrix<f64>, na::DMatrix<f64>), Box<dyn std::error::Error>> {
+        let n = mat_a.nrows();
+        let r = mat_c.nrows();
+        let m = mat_b.ncols();
 
-    //     // Lifted matrix O
-    //     let mut mat_o: na::DMatrix<f64> = na::DMatrix<f64>::zeros(f * r, n);
+        // Lifted matrix O
+        let mut mat_o = na::DMatrix::<f64>::zeros(f * r, n);
 
-    //     let mut pow_a = mat_a.clone();
-    //     for i in 0..f {
-    //         if i != 0 {
-    //             pow_a = pow_a * &mat_a;
-    //         }
+        let mut pow_a = mat_a.clone();
+        for i in 0..f {
+            if i != 0 {
+            pow_a = &pow_a * mat_a;
+            }
 
-    //         mat_o
-    //             .slice_mut(s![i * r..(i + 1) * r, ..])
-    //             .assign(&(mat_c.dot(&pow_a)));
-    //     }
+            mat_o
+            .slice_mut((i * r, 0), (r, n))
+            .copy_from(&(&*mat_c * &pow_a));
+        }
 
-    //     // Lifted matrix M
-    //     let mut mat_m: na::DMatrix<f64> = Array2::zeros((f * r, v * m));
+        // Lifted matrix M
+        let mut mat_m: na::DMatrix<f64> = na::DMatrix::zeros(f * r, v * m);
 
-    //     for i in 0..f {
-    //         // Until the control horizon
-    //         if i < v {
-    //             for j in 0..(i + 1) {
-    //                 if j == 0 {
-    //                     pow_a = Array2::eye(n);
-    //                 } else {
-    //                     pow_a.assign(&(pow_a.dot(mat_a)));
-    //                 }
+        for i in 0..f {
+            // Until the control horizon
+            if i < v {
+            for j in 0..=i {
+                if j == 0 {
+                pow_a = na::DMatrix::identity(n, n);
+                } else {
+                pow_a = &pow_a * mat_a;
+                }
 
-    //                 mat_m
-    //                     .slice_mut(s![i * r..(i + 1) * r, (i - j) * m..(i - j + 1) * m])
-    //                     .assign(&(mat_c.dot(&(pow_a.dot(mat_b)))));
-    //             }
-    //         } else {
-    //             for j in 0..v {
-    //                 // Here we form the last entry
-    //                 if j == 0 {
-    //                     let mut sum_last: na::DMatrix<f64> = Array2::zeros((n, n));
-    //                     for s in 0..i - v + 2 {
-    //                         if s == 0 {
-    //                             pow_a = Array2::eye(n);
-    //                         } else {
-    //                             pow_a.assign(&(pow_a.dot(mat_a)));
-    //                         }
+                mat_m
+                .slice_mut((i * r, (i - j) * m), (r, m))
+                .copy_from(&(&*mat_c * &pow_a * mat_b));
+            }
+            } else {
+            for j in 0..v {
+                // Here we form the last entry
+                if j == 0 {
+                let mut sum_last: na::DMatrix<f64> = na::DMatrix::zeros(n, n);
+                for s in 0..(i - v + 2) {
+                    if s == 0 {
+                    pow_a = na::DMatrix::identity(n, n);
+                    } else {
+                    pow_a = &pow_a * mat_a;
+                    }
 
-    //                         sum_last = sum_last + &pow_a;
-    //                     }
+                    sum_last += &pow_a;
+                }
 
-    //                     mat_m
-    //                         .slice_mut(s![i * r..(i + 1) * r, (v - 1) * m..(v) * m])
-    //                         .assign(&(mat_c.dot(&(sum_last.dot(mat_b)))));
-    //                 } else {
-    //                     pow_a.assign(&(pow_a.dot(mat_a)));
+                mat_m
+                    .slice_mut((i * r, (v - 1) * m), (r, m))
+                    .copy_from(&(&*mat_c * &sum_last * mat_b));
+                } else {
+                pow_a = &pow_a * mat_a;
 
-    //                     mat_m
-    //                         .slice_mut(s![i * r..(i + 1) * r, (v - 1 - j) * m..(v - j) * m])
-    //                         .assign(&(mat_c.dot(&(pow_a.dot(mat_b)))));
-    //                 }
-    //             }
-    //         }
-    //     }
+                mat_m
+                    .slice_mut((i * r, (v - 1 - j) * m), (r, m))
+                    .copy_from(&(&*mat_c * &pow_a * mat_b));
+                }
+            }
+            }
+        }
 
-    //     let tmp1 = mat_m.t().dot(&(mat_w4.dot(&mat_m)));
-    //     let tmp2: na::DMatrix<f64> = (tmp1 + mat_w3).to_owned().inv()?;
-    //     let gain_matrix = tmp2.dot(&(mat_m.t().dot(mat_w4)));
+        let tmp1 = mat_m.transpose() * mat_w4 * &mat_m;
+        let tmp2: na::DMatrix<f64> = (tmp1 + mat_w3).try_inverse().ok_or("Matrix inversion failed")?;
+        let gain_matrix = tmp2 * mat_m.transpose() * mat_w4;
 
-    //     Ok((mat_o, mat_m, gain_matrix))
-    // }
+        Ok((mat_o, mat_m, gain_matrix))
+    }
 
     pub fn propagate_dynamics(
         &self,
