@@ -38,7 +38,7 @@ impl Controller {
             }
 
             mat_o
-            .slice_mut((i * r, 0), (r, n))
+            .view_mut((i * r, 0), (r, n))
             .copy_from(&(&*mat_c * &pow_a));
         }
 
@@ -56,7 +56,7 @@ impl Controller {
                 }
 
                 mat_m
-                .slice_mut((i * r, (i - j) * m), (r, m))
+                .view_mut((i * r, (i - j) * m), (r, m))
                 .copy_from(&(&*mat_c * &pow_a * mat_b));
             }
             } else {
@@ -75,13 +75,13 @@ impl Controller {
                 }
 
                 mat_m
-                    .slice_mut((i * r, (v - 1) * m), (r, m))
+                    .view_mut((i * r, (v - 1) * m), (r, m))
                     .copy_from(&(&*mat_c * &sum_last * mat_b));
                 } else {
                 pow_a = &pow_a * mat_a;
 
                 mat_m
-                    .slice_mut((i * r, (v - 1 - j) * m), (r, m))
+                    .view_mut((i * r, (v - 1 - j) * m), (r, m))
                     .copy_from(&(&*mat_c * &pow_a * mat_b));
                 }
             }
@@ -150,7 +150,7 @@ impl Controller {
     //     v: usize,
     //     mat_w3: &na::DMatrix<f64>,
     //     mat_w4: &na::DMatrix<f64>,
-    //     x0: Array1<f64>,
+    //     x0: na::DVector<f64>,
     //     desired_ctrl_traj: &na::DMatrix<f64>,
     // ) -> Result<Controller, Box<dyn std::error::Error>> {
     //     // Form the lifted system matrices and vectors
@@ -160,15 +160,15 @@ impl Controller {
     //         Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
 
     //     // We store the state vectors of the controlled state trajectory
-    //     let mut states: na::DMatrix<f64> = Array2::zeros((1, x0.shape()[0]));
-    //     states.slice_mut(s![0, ..]).assign(&x0);
+    //     let mut states = na::DMatrix::<f64>::zeros(1, x0.nrows());
+    //     states.row(0).copy_from(&x0);
 
     //     // We store the computed inputs
-    //     let inputs: na::DMatrix<f64> = array![[]];
+    //     let inputs = na::DMatrix::<f64>::new();
 
     //     // # we store the output vectors of the controlled state trajectory
-    //     let mut outputs: na::DMatrix<f64> = Array2::zeros((1, mat_c.nrows()));
-    //     outputs.slice_mut(s![0, ..]).assign(&(mat_c.dot(&x0)));
+    //     let mut outputs = na::DMatrix::<f64>::zeros(1, mat_c.nrows());
+    //     outputs.row(0).copy_from(&(mat_c * &x0));
 
     //     Ok(Controller {
     //         mat_a: mat_a,
