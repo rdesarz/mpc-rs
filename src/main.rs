@@ -1,7 +1,7 @@
 // use mpc_rs::mpc::controller::Controller;
-// use mpc_rs::mpc::simulator::system_simulate;
+use mpc_rs::mpc::simulator::system_simulate;
 
-// use plotters::prelude::*;
+use plotters::prelude::*;
 
 extern crate nalgebra as na;
 
@@ -34,64 +34,64 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Model discretization
     let mat_i = na::DMatrix::<f64>::identity(mat_ac.nrows(), mat_ac.nrows());
-    let mat_a = mat_ac.scale(sampling).try_inverse().unwrap();
-    let mat_b = mat_a * mat_bc.scale(sampling);
+    let mat_a = (mat_i - mat_ac.scale(sampling)).try_inverse().unwrap();
+    let mat_b = &mat_a * mat_bc.scale(sampling);
     let mat_c = mat_cc;
 
     let time_sample_test = 200;
 
     // Compute the system's step response
     let input_test = na::DMatrix::from_element(1, time_sample_test, 10.0f64);
-    let x0_test = na::DMatrix::<f64>::zeros(1, 4);
+    let x0_test = na::DVector::<f64>::zeros(4);
 
     // // # simulate the discrete-time system
-    // let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
+    let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
-    // // Draw the response
-    // {
-    //     let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
-    //     root.fill(&WHITE)?;
+    // Draw the response
+    {
+        let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
+        root.fill(&WHITE)?;
 
-    //     let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-    //     let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
-    //     let mut chart = ChartBuilder::on(&root)
-    //         .caption("System Output Y", ("sans-serif", 20))
-    //         .margin(10)
-    //         .x_label_area_size(30)
-    //         .y_label_area_size(40)
-    //         .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+        let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+        let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
+        let mut chart = ChartBuilder::on(&root)
+            .caption("System Output Y", ("sans-serif", 20))
+            .margin(10)
+            .x_label_area_size(30)
+            .y_label_area_size(40)
+            .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
 
-    //     chart.configure_mesh().draw()?;
+        chart.configure_mesh().draw()?;
 
-    //     // Plot input
-    //     let series_input: Vec<(i32, f64)> = input_test
-    //         .row(0)
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(i, &val)| (i as i32, val as f64))
-    //         .collect();
+        // Plot input
+        let series_input: Vec<(i32, f64)> = input_test
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
 
-    //     chart
-    //         .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
-    //         .label(format!("Output {}", 0))
-    //         .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+        chart
+            .draw_series(LineSeries::new(series_input, &Palette99::pick(0)))?
+            .label(format!("Output {}", 0))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
-    //     // Plot system response
-    //     let series_y: Vec<(i32, f64)> = y_test
-    //         .row(0)
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(i, &val)| (i as i32, val as f64))
-    //         .collect();
+        // Plot system response
+        let series_y: Vec<(i32, f64)> = y_test
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
 
-    //     chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
+        chart.draw_series(LineSeries::new(series_y, &Palette99::pick(1)))?;
 
-    //     chart
-    //         .configure_series_labels()
-    //         .background_style(&WHITE)
-    //         .border_style(&BLACK)
-    //         .draw()?;
-    // }
+        chart
+            .configure_series_labels()
+            .background_style(&WHITE)
+            .border_style(&BLACK)
+            .draw()?;
+    }
 
     // W1 matrix
     // let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
