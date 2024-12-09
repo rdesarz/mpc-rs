@@ -142,46 +142,46 @@ impl Controller {
         self.current_timestep = self.current_timestep + 1;
     }
 
-    // pub fn new(
-    //     mat_a: na::DMatrix<f64>,
-    //     mat_b: na::DMatrix<f64>,
-    //     mat_c: na::DMatrix<f64>,
-    //     f: usize,
-    //     v: usize,
-    //     mat_w3: &na::DMatrix<f64>,
-    //     mat_w4: &na::DMatrix<f64>,
-    //     x0: na::DVector<f64>,
-    //     desired_ctrl_traj: &na::DMatrix<f64>,
-    // ) -> Result<Controller, Box<dyn std::error::Error>> {
-    //     // Form the lifted system matrices and vectors
-    //     // the gain matrix is used to compute the solution
-    //     // here we pre-compute it to save computational time
-    //     let (mat_o, _, gain_matrix) =
-    //         Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
+    pub fn new(
+        mat_a: na::DMatrix<f64>,
+        mat_b: na::DMatrix<f64>,
+        mat_c: na::DMatrix<f64>,
+        f: usize,
+        v: usize,
+        mat_w3: &na::DMatrix<f64>,
+        mat_w4: &na::DMatrix<f64>,
+        x0: na::DVector<f64>,
+        desired_ctrl_traj: &na::DMatrix<f64>,
+    ) -> Result<Controller, Box<dyn std::error::Error>> {
+        // Form the lifted system matrices and vectors
+        // the gain matrix is used to compute the solution
+        // here we pre-compute it to save computational time
+        let (mat_o, _, gain_matrix) =
+            Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
 
-    //     // We store the state vectors of the controlled state trajectory
-    //     let mut states = na::DMatrix::<f64>::zeros(1, x0.nrows());
-    //     states.row(0).copy_from(&x0);
+        // We store the state vectors of the controlled state trajectory
+        let mut states = na::DMatrix::<f64>::zeros(1, x0.nrows());
+        states.row_mut(0).copy_from(&x0);
 
-    //     // We store the computed inputs
-    //     let inputs = na::DMatrix::<f64>::new();
+        // // We store the computed inputs
+        let inputs = na::DMatrix::<f64>::zeros(0, 0);
 
-    //     // # we store the output vectors of the controlled state trajectory
-    //     let mut outputs = na::DMatrix::<f64>::zeros(1, mat_c.nrows());
-    //     outputs.row(0).copy_from(&(mat_c * &x0));
+        // // # we store the output vectors of the controlled state trajectory
+        let mut outputs = na::DMatrix::<f64>::zeros(1, mat_c.nrows());
+        outputs.row_mut(0).copy_from(&(&mat_c * x0));
 
-    //     Ok(Controller {
-    //         mat_a: mat_a,
-    //         mat_b: mat_b,
-    //         mat_c: mat_c,
-    //         f: f,
-    //         desired_ctrl_traj_total: desired_ctrl_traj.clone(),
-    //         current_timestep: 0,
-    //         mat_o: mat_o,
-    //         gain_matrix: gain_matrix,
-    //         states: states,
-    //         inputs: inputs,
-    //         outputs: outputs,
-    //     })
-    // }
+        Ok(Controller {
+            mat_a: mat_a,
+            mat_b: mat_b,
+            mat_c: mat_c,
+            f: f,
+            desired_ctrl_traj_total: desired_ctrl_traj.clone(),
+            current_timestep: 0,
+            mat_o: mat_o,
+            gain_matrix: gain_matrix,
+            states: states,
+            inputs: inputs,
+            outputs: outputs,
+        })
+    }
 }
