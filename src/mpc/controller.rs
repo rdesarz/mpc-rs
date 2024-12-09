@@ -123,15 +123,15 @@ impl Controller {
         .into_owned();
 
         // Compute the control sequence
-        // let input_sequence_computed = self.gain_matrix.dot(&vec_s);
-        // let mut input_applied: Array1<f64> = Array1::zeros(1);
-        // input_applied[0] = input_sequence_computed[[0, 0]];
+        let input_sequence_computed = &self.gain_matrix * vec_s;
+        let mut input_applied = na::DVector::<f64>::zeros(1);
+        input_applied[0] = input_sequence_computed[(0, 0)];
 
-        // // Compute the next state and output
-        // let (state_kp1, output_k) = self.propagate_dynamics(
-        //     &input_applied,
-        //     &self.states.slice(s![self.current_timestep, ..]).to_owned(),
-        // );
+        // Compute the next state and output
+        let (state_kp1, output_k) = self.propagate_dynamics(
+            &input_applied,
+            &self.states.column(self.current_timestep).into_owned(),
+        );
 
         // // Append the lists
         // self.states = ndarray::concatenate(
