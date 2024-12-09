@@ -21,14 +21,14 @@ pub fn system_simulate(
                 .column_mut(i + 1)
                 .copy_from(&(mat_a * x0 + mat_b * mat_u.column(i)));
         } else {
-            // mat_y
-            //     .slice_mut(s![.., i])
-            //     .assign(&(mat_c.dot(&mat_x.slice(s![.., i]))));
+            mat_y
+                .column_mut(i)
+                .copy_from(&(mat_c * mat_x.column(i)));
 
-            // let mat_x_slice = mat_x.slice(s![.., i]).to_owned();
-            // mat_x
-            //     .slice_mut(s![.., i + 1])
-            //     .assign(&(mat_a.dot(&mat_x_slice) + mat_b.dot(&mat_u.slice(s![.., i]))));
+            let mat_x_slice = mat_x.column(i).into_owned();
+            mat_x
+                .column_mut(i + 1)
+                .copy_from(&(mat_a * mat_x_slice + mat_b * mat_u.column(i)));
         }
     }
 
