@@ -1,4 +1,3 @@
-
 use nalgebra as na;
 
 pub fn system_simulate(
@@ -21,9 +20,7 @@ pub fn system_simulate(
                 .column_mut(i + 1)
                 .copy_from(&(mat_a * x0 + mat_b * mat_u.column(i)));
         } else {
-            mat_y
-                .column_mut(i)
-                .copy_from(&(mat_c * mat_x.column(i)));
+            mat_y.column_mut(i).copy_from(&(mat_c * mat_x.column(i)));
 
             let mat_x_slice = mat_x.column(i).into_owned();
             mat_x
