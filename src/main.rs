@@ -97,15 +97,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut mat_w1 = na::DMatrix::<f64>::zeros(v * m, v * m);
 
     mat_w1
-        .view_range_mut((0..m), (0..m))
+        .view_range_mut(0..m, 0..m)
         .copy_from(&na::DMatrix::identity(m, m));
 
     for i in 1..v {
         mat_w1
-            .view_range_mut((i * m..(i + 1) * m), (i * m..(i + 1) * m))
+            .view_range_mut(i * m..(i + 1) * m, i * m..(i + 1) * m)
             .copy_from(&na::DMatrix::identity(m, m));
         mat_w1
-            .view_range_mut((i * m..(i + 1) * m), ((i - 1) * m..i * m))
+            .view_range_mut(i * m..(i + 1) * m, (i - 1) * m..i * m)
             .copy_from(&(na::DMatrix::identity(m, m).scale(-1.0)));
     }
 
@@ -115,11 +115,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut mat_w2 = na::DMatrix::<f64>::zeros(v * m, v * m);
 
-    mat_w2.view_range_mut((0..m), (0..m)).copy_from(&mat_q0);
+    mat_w2.view_range_mut(0..m, 0..m).copy_from(&mat_q0);
 
     for i in 1..v {
         mat_w2
-            .view_range_mut((i * m..(i + 1) * m), (i * m..(i + 1) * m))
+            .view_range_mut(i * m..(i + 1) * m, i * m..(i + 1) * m)
             .copy_from(&mat_q_other);
     }
 
@@ -133,7 +133,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     for i in 0..f {
         mat_w4
-            .view_range_mut((i * r..(i + 1) * r), (i * r..(i + 1) * r))
+            .view_range_mut(i * r..(i + 1) * r, i * r..(i + 1) * r)
             .copy_from(&na::DMatrix::from_element(r, r, pred_weight));
     }
 
