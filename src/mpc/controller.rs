@@ -23,7 +23,8 @@ impl Controller {
         v: usize,
         mat_w3: &na::DMatrix<f64>,
         mat_w4: &na::DMatrix<f64>,
-    ) -> Result<(na::DMatrix<f64>, na::DMatrix<f64>, na::DMatrix<f64>), Box<dyn std::error::Error>> {
+    ) -> Result<(na::DMatrix<f64>, na::DMatrix<f64>, na::DMatrix<f64>), Box<dyn std::error::Error>>
+    {
         let n = mat_a.nrows();
         let r = mat_c.nrows();
         let m = mat_b.ncols();
@@ -34,12 +35,12 @@ impl Controller {
         let mut pow_a = mat_a.clone();
         for i in 0..f {
             if i != 0 {
-            pow_a = &pow_a * mat_a;
+                pow_a = &pow_a * mat_a;
             }
 
             mat_o
-            .view_mut((i * r, 0), (r, n))
-            .copy_from(&(&*mat_c * &pow_a));
+                .view_mut((i * r, 0), (r, n))
+                .copy_from(&(&*mat_c * &pow_a));
         }
 
         // Lifted matrix M
@@ -48,48 +49,50 @@ impl Controller {
         for i in 0..f {
             // Until the control horizon
             if i < v {
-            for j in 0..=i {
-                if j == 0 {
-                pow_a = na::DMatrix::identity(n, n);
-                } else {
-                pow_a = &pow_a * mat_a;
-                }
-
-                mat_m
-                .view_mut((i * r, (i - j) * m), (r, m))
-                .copy_from(&(&*mat_c * &pow_a * mat_b));
-            }
-            } else {
-            for j in 0..v {
-                // Here we form the last entry
-                if j == 0 {
-                let mut sum_last: na::DMatrix<f64> = na::DMatrix::zeros(n, n);
-                for s in 0..(i - v + 2) {
-                    if s == 0 {
-                    pow_a = na::DMatrix::identity(n, n);
+                for j in 0..=i {
+                    if j == 0 {
+                        pow_a = na::DMatrix::identity(n, n);
                     } else {
-                    pow_a = &pow_a * mat_a;
+                        pow_a = &pow_a * mat_a;
                     }
 
-                    sum_last += &pow_a;
+                    mat_m
+                        .view_mut((i * r, (i - j) * m), (r, m))
+                        .copy_from(&(&*mat_c * &pow_a * mat_b));
                 }
+            } else {
+                for j in 0..v {
+                    // Here we form the last entry
+                    if j == 0 {
+                        let mut sum_last: na::DMatrix<f64> = na::DMatrix::zeros(n, n);
+                        for s in 0..(i - v + 2) {
+                            if s == 0 {
+                                pow_a = na::DMatrix::identity(n, n);
+                            } else {
+                                pow_a = &pow_a * mat_a;
+                            }
 
-                mat_m
-                    .view_mut((i * r, (v - 1) * m), (r, m))
-                    .copy_from(&(&*mat_c * &sum_last * mat_b));
-                } else {
-                pow_a = &pow_a * mat_a;
+                            sum_last += &pow_a;
+                        }
 
-                mat_m
-                    .view_mut((i * r, (v - 1 - j) * m), (r, m))
-                    .copy_from(&(&*mat_c * &pow_a * mat_b));
+                        mat_m
+                            .view_mut((i * r, (v - 1) * m), (r, m))
+                            .copy_from(&(&*mat_c * &sum_last * mat_b));
+                    } else {
+                        pow_a = &pow_a * mat_a;
+
+                        mat_m
+                            .view_mut((i * r, (v - 1 - j) * m), (r, m))
+                            .copy_from(&(&*mat_c * &pow_a * mat_b));
+                    }
                 }
-            }
             }
         }
 
         let tmp1 = mat_m.transpose() * mat_w4 * &mat_m;
-        let tmp2: na::DMatrix<f64> = (tmp1 + mat_w3).try_inverse().ok_or("Matrix inversion failed")?;
+        let tmp2: na::DMatrix<f64> = (tmp1 + mat_w3)
+            .try_inverse()
+            .ok_or("Matrix inversion failed")?;
         let gain_matrix = tmp2 * mat_m.transpose() * mat_w4;
 
         Ok((mat_o, mat_m, gain_matrix))

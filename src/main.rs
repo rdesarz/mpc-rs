@@ -94,60 +94,59 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // W1 matrix
-    // let mut mat_w1: Array2<f64> = Array2::zeros((v * m, v * m));
+    let mut mat_w1 = na::DMatrix::<f64>::zeros(v * m, v * m);
 
-    // mat_w1.slice_mut(s![0..m, 0..m]).assign(&Array2::eye(m));
+    mat_w1
+        .view_range_mut((0..m), (0..m))
+        .copy_from(&na::DMatrix::identity(m, m));
 
-    // for i in 1..v {
-    //     mat_w1
-    //         .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //         .assign(&Array2::eye(m));
-    //     mat_w1
-    //         .slice_mut(s![i * m..(i + 1) * m, (i - 1) * m..(i) * m])
-    //         .assign(&(-1.0 * Array2::eye(m)));
-    // }
+    for i in 1..v {
+        mat_w1
+            .view_range_mut((i * m..(i + 1) * m), (i * m..(i + 1) * m))
+            .copy_from(&na::DMatrix::identity(m, m));
+        mat_w1
+            .view_range_mut((i * m..(i + 1) * m), ((i - 1) * m..i * m))
+            .copy_from(&(na::DMatrix::identity(m, m).scale(-1.0)));
+    }
 
     // // W2 matrix
-    // let mat_q0 = array![0.0000000011f64];
-    // let math_q_other = array![0.0001f64];
+    // let mat_q0 = na::DMatrix::from_element(m, m, 0.0000000011f64);
+    // let mat_q_other = na::DMatrix::from_element(m, m, 0.0001f64);
 
-    // let mut mat_w2: Array2<f64> = Array2::zeros((v * m, v * m));
+    // let mut mat_w2 = na::DMatrix::<f64>::zeros(v * m, v * m);
 
-    // mat_w2.slice_mut(s![0..m, 0..m]).assign(&mat_q0);
+    // mat_w2.slice_mut((0..m, 0..m)).copy_from(&mat_q0);
 
     // for i in 1..v {
     //     mat_w2
-    //         .slice_mut(s![i * m..(i + 1) * m, i * m..(i + 1) * m])
-    //         .assign(&math_q_other);
+    //         .slice_mut((i * m..(i + 1) * m, i * m..(i + 1) * m))
+    //         .copy_from(&mat_q_other);
     // }
 
     // // W3 matrix
-    // let mat_w3 = mat_w1.t().dot(&(mat_w2.dot(&mat_w1)));
+    // let mat_w3 = mat_w1.transpose() * (mat_w2 * mat_w1);
 
     // // W4 matrix
-    // let mut mat_w4: Array2<f64> = Array2::zeros((f * r, f * r));
+    // let mut mat_w4 = na::DMatrix::<f64>::zeros(f * r, f * r);
 
-    // let pred_weight = array![10f64];
+    // let pred_weight = 10f64;
 
     // for i in 0..f {
     //     mat_w4
-    //         .slice_mut(s![i * r..(i + 1) * r, i * r..(i + 1) * r])
-    //         .assign(&pred_weight);
+    //         .slice_mut((i * r..(i + 1) * r, i * r..(i + 1) * r))
+    //         .copy_from(&na::DMatrix::from_element(r, r, pred_weight));
     // }
 
     // let time_steps = 300;
 
-    // // Define a step trajectory
-    // // let desired_traj: Array2<f64> = 0.3 * Array2::ones((time_steps, 1));
-
     // // Define a pulse trajectory
-    // let mut desired_traj: Array2<f64> = Array2::zeros((time_steps, 1));
+    // let mut desired_traj = na::DMatrix::<f64>::zeros(time_steps, 1);
     // desired_traj
-    //     .slice_mut(s![0..100, ..])
-    //     .assign(&Array2::ones((100, 1)));
+    //     .slice_mut((0..100, 0..1))
+    //     .copy_from(&na::DMatrix::from_element(100, 1, 1.0));
     // desired_traj
-    //     .slice_mut(s![200.., ..])
-    //     .assign(&Array2::ones((100, 1)));
+    //     .slice_mut((200..300, 0..1))
+    //     .copy_from(&na::DMatrix::from_element(100, 1, 1.0));
 
     // // Set the initial state
     // let x0 = x0_test;
