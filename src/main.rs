@@ -38,17 +38,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mat_b = mat_a * mat_bc.scale(sampling);
     let mat_c = mat_cc;
 
-    // check the eigenvalues
-    // let _eigen_a = mat_ac.eig()?;
-    // let _eigen_aid = mat_a.eig()?;
+    let time_sample_test = 200;
 
-    // let time_sample_test = 200;
+    // Compute the system's step response
+    let input_test = na::DMatrix::from_element(1, time_sample_test, 10.0f64);
+    let x0_test = na::DMatrix::<f64>::zeros(1, 4);
 
-    // // Compute the system's step response
-    // let input_test = 10.0 * Array2::ones((1, time_sample_test));
-    // let x0_test = Array::zeros(4);
-
-    // // // # simulate the discrete-time system
+    // // # simulate the discrete-time system
     // let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
     // // Draw the response
