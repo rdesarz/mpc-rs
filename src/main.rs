@@ -22,25 +22,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         0.0, 0.0, 0.0, 1.0;
         k2 / m2, d2 / m2, -k2 / m2, -d2 / m2
     ];
-    println!("{}", mat_ac);
-    // let mat_bc = na::dmatrix![[0.0], [0.0], [0.0], [1.0 / m2]];
-    // let mat_cc = na::dmatrix![[1.0, 0.0, 0.0, 0.0]];
+    let mat_bc = na::dmatrix![0.0; 0.0; 0.0; 1.0 / m2];
+    let mat_cc = na::dmatrix![1.0, 0.0, 0.0, 0.0];
 
-    // let r = 1usize;
-    // let m = 1usize; // number of inputs and outputs
-    // let _n = 4usize; // state dimension
+    let r = 1usize;
+    let m = 1usize; // number of inputs and outputs
+    let _n = 4usize; // state dimension
 
     // Discretization constant
-    let sampling = 0.05;
+    let sampling = 0.05f64;
 
     // Model discretization
-    // let mat_i = na::DMatrix::identity(mat_ac.nrows(), mat_ac.nrows());
-    let test = mat_ac.scale(sampling);
-    // mat_a.try_inverse_mut();
-    // let mat_b = mat_a.dot(&(sampling * mat_bc));
-    // let mat_c = mat_cc;
+    let mat_i = na::DMatrix::<f64>::identity(mat_ac.nrows(), mat_ac.nrows());
+    let mat_a = mat_ac.scale(sampling).try_inverse().unwrap();
+    let mat_b = mat_a * mat_bc.scale(sampling);
+    let mat_c = mat_cc;
 
-    // // check the eigenvalues
+    // check the eigenvalues
     // let _eigen_a = mat_ac.eig()?;
     // let _eigen_aid = mat_a.eig()?;
 
