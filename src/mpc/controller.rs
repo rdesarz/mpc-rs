@@ -1,4 +1,3 @@
-
 use nalgebra as na;
 
 pub struct Controller {
@@ -110,60 +109,55 @@ impl Controller {
         (x_kp1, y_k)
     }
 
-    // pub fn compute_control_inputs(&mut self) {
-    //     // Extract the segment of the desired control trajectory
-    //     let desired_ctrl_traj = self
-    //         .desired_ctrl_traj_total
-    //         .slice(s![
-    //             self.current_timestep..(self.current_timestep + self.f),
-    //             ..
-    //         ])
-    //         .to_owned();
+    pub fn compute_control_inputs(&mut self) {
+        // Extract the segment of the desired control trajectory
+        let desired_ctrl_traj = self
+            .desired_ctrl_traj_total
+            .rows(self.current_timestep, self.current_timestep + self.f)
+            .into_owned();
 
-    //     // Compute the vector s
-    //     let vec_s = (desired_ctrl_traj.t().to_owned()
-    //         - self
-    //             .mat_o
-    //             .dot(&self.states.slice(s![self.current_timestep, ..])))
-    //     .t()
-    //     .to_owned();
+        // Compute the vector s
+        let vec_s = (desired_ctrl_traj.transpose().into_owned()
+            - &self.mat_o * self.states.row(self.current_timestep))
+        .transpose()
+        .into_owned();
 
-    //     // Compute the control sequence
-    //     let input_sequence_computed = self.gain_matrix.dot(&vec_s);
-    //     let mut input_applied: Array1<f64> = Array1::zeros(1);
-    //     input_applied[0] = input_sequence_computed[[0, 0]];
+        // Compute the control sequence
+        // let input_sequence_computed = self.gain_matrix.dot(&vec_s);
+        // let mut input_applied: Array1<f64> = Array1::zeros(1);
+        // input_applied[0] = input_sequence_computed[[0, 0]];
 
-    //     // Compute the next state and output
-    //     let (state_kp1, output_k) = self.propagate_dynamics(
-    //         &input_applied,
-    //         &self.states.slice(s![self.current_timestep, ..]).to_owned(),
-    //     );
+        // // Compute the next state and output
+        // let (state_kp1, output_k) = self.propagate_dynamics(
+        //     &input_applied,
+        //     &self.states.slice(s![self.current_timestep, ..]).to_owned(),
+        // );
 
-    //     // Append the lists
-    //     self.states = ndarray::concatenate(
-    //         Axis(0),
-    //         &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()],
-    //     )
-    //     .unwrap();
+        // // Append the lists
+        // self.states = ndarray::concatenate(
+        //     Axis(0),
+        //     &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()],
+        // )
+        // .unwrap();
 
-    //     self.outputs = ndarray::concatenate(
-    //         Axis(0),
-    //         &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()],
-    //     )
-    //     .unwrap();
+        // self.outputs = ndarray::concatenate(
+        //     Axis(0),
+        //     &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()],
+        // )
+        // .unwrap();
 
-    //     self.inputs = ndarray::concatenate(
-    //         Axis(1),
-    //         &[
-    //             self.inputs.view(),
-    //             input_applied.insert_axis(Axis(0)).view(),
-    //         ],
-    //     )
-    //     .unwrap();
+        // self.inputs = ndarray::concatenate(
+        //     Axis(1),
+        //     &[
+        //         self.inputs.view(),
+        //         input_applied.insert_axis(Axis(0)).view(),
+        //     ],
+        // )
+        // .unwrap();
 
-    //     // Increment the time step
-    //     self.current_timestep = self.current_timestep + 1;
-    // }
+        // // Increment the time step
+        // self.current_timestep = self.current_timestep + 1;
+    }
 
     // pub fn new(
     //     mat_a: na::DMatrix<f64>,
