@@ -133,30 +133,13 @@ impl Controller {
             &self.states.column(self.current_timestep).into_owned(),
         );
 
-        // // Append the lists
-        // self.states = ndarray::concatenate(
-        //     Axis(0),
-        //     &[self.states.view(), state_kp1.insert_axis(Axis(0)).view()],
-        // )
-        // .unwrap();
+        // Append the lists
+        self.states = na::stack![self.states, state_kp1];
+        self.outputs = na::stack![self.outputs, output_k];
+        self.inputs = na::stack![self.inputs, input_applied];
 
-        // self.outputs = ndarray::concatenate(
-        //     Axis(0),
-        //     &[self.outputs.view(), output_k.insert_axis(Axis(0)).view()],
-        // )
-        // .unwrap();
-
-        // self.inputs = ndarray::concatenate(
-        //     Axis(1),
-        //     &[
-        //         self.inputs.view(),
-        //         input_applied.insert_axis(Axis(0)).view(),
-        //     ],
-        // )
-        // .unwrap();
-
-        // // Increment the time step
-        // self.current_timestep = self.current_timestep + 1;
+        // Increment the time step
+        self.current_timestep = self.current_timestep + 1;
     }
 
     // pub fn new(
