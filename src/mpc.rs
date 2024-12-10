@@ -1,3 +1,3 @@
 pub mod controller;
 pub mod simulator;
-// pub mod example;
+pub mod example;
