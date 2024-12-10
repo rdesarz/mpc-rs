@@ -116,11 +116,10 @@ impl Controller {
         // Extract the segment of the desired control trajectory
         let desired_ctrl_traj = self
             .desired_ctrl_traj_total
-            .rows(self.current_timestep, self.current_timestep + self.f)
+            .view_range((self.current_timestep..self.current_timestep + self.f), ..)
             .into_owned();
 
         // Compute the vector s
-        println!("{}", self.mat_o);
         let vec_s = (desired_ctrl_traj
             - &self.mat_o * self.states.column(self.current_timestep))
         .into_owned();
@@ -140,7 +139,6 @@ impl Controller {
         self.states = na::stack![self.states, state_kp1];
         self.outputs = na::stack![self.outputs, output_k];
 
-        // println!("{}", input_applied);
         if (self.inputs.shape() == (0, 0))
         {
             self.inputs.resize_mut(1, input_applied.nrows(), 0.);
@@ -174,8 +172,6 @@ impl Controller {
 
         // We store the state vectors of the controlled state trajectory. States are stored as column
         let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
-        println!("{}", states);
-        println!("{}", x0);
 
         states.column_mut(0).copy_from(&x0);
 
