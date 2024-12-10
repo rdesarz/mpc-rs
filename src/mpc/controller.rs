@@ -120,9 +120,9 @@ impl Controller {
             .into_owned();
 
         // Compute the vector s
-        let vec_s = (desired_ctrl_traj.transpose().into_owned()
-            - &self.mat_o * self.states.row(self.current_timestep))
-        .transpose()
+        println!("{}", self.mat_o);
+        let vec_s = (desired_ctrl_traj
+            - &self.mat_o * self.states.column(self.current_timestep))
         .into_owned();
 
         // Compute the control sequence
@@ -139,7 +139,17 @@ impl Controller {
         // Append the lists
         self.states = na::stack![self.states, state_kp1];
         self.outputs = na::stack![self.outputs, output_k];
-        self.inputs = na::stack![self.inputs, input_applied];
+
+        // println!("{}", input_applied);
+        if (self.inputs.shape() == (0, 0))
+        {
+            self.inputs.resize_mut(1, input_applied.nrows(), 0.);
+            self.inputs.view_range_mut(0, ..).copy_from(&input_applied);
+        }
+        else
+        {
+            self.inputs = na::stack![self.inputs, input_applied];
+        }
 
         // Increment the time step
         self.current_timestep = self.current_timestep + 1;
@@ -162,9 +172,12 @@ impl Controller {
         let (mat_o, _, gain_matrix) =
             Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
 
-        // We store the state vectors of the controlled state trajectory
-        let mut states = na::DMatrix::<f64>::zeros(1, x0.nrows());
-        states.row_mut(0).copy_from(&x0);
+        // We store the state vectors of the controlled state trajectory. States are stored as column
+        let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
+        println!("{}", states);
+        println!("{}", x0);
+
+        states.column_mut(0).copy_from(&x0);
 
         // // We store the computed inputs
         let inputs = na::DMatrix::<f64>::zeros(0, 0);
