@@ -172,7 +172,6 @@ impl Controller {
 
         // We store the state vectors of the controlled state trajectory. States are stored as column
         let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
-
         states.column_mut(0).copy_from(&x0);
 
         // // We store the computed inputs
