@@ -116,7 +116,7 @@ impl Controller {
         // Extract the segment of the desired control trajectory
         let desired_ctrl_traj = self
             .desired_ctrl_traj_total
-            .view_range((self.current_timestep..self.current_timestep + self.f), ..)
+            .view_range(self.current_timestep..self.current_timestep + self.f, ..)
             .into_owned();
 
         // Compute the vector s
@@ -138,7 +138,7 @@ impl Controller {
         self.states = na::stack![self.states, state_kp1];
         self.outputs = na::stack![self.outputs, output_k];
 
-        if (self.inputs.shape() == (0, 0)) {
+        if self.inputs.shape() == (0, 0) {
             self.inputs.resize_mut(1, input_applied.nrows(), 0.);
             self.inputs.view_range_mut(0, ..).copy_from(&input_applied);
         } else {
