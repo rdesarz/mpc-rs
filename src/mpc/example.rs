@@ -10,6 +10,7 @@ pub fn compute_system_response(time_sample_test: usize) -> Vec<f64> {
     let k2 = 200.0;
     let d1 = 1.0;
     let d2 = 5.0;
+    
     // Define the continuous-time system matrices
     let mat_ac = na::dmatrix![
         0.0, 1.0, 0.0, 0.0;
