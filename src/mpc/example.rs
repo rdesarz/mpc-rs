@@ -10,7 +10,7 @@ pub fn compute_system_response(time_sample_test: usize) -> Vec<f64> {
     let k2 = 200.0;
     let d1 = 1.0;
     let d2 = 5.0;
-    
+
     // Define the continuous-time system matrices
     let mat_ac = na::dmatrix![
         0.0, 1.0, 0.0, 0.0;
@@ -37,7 +37,7 @@ pub fn compute_system_response(time_sample_test: usize) -> Vec<f64> {
     // // # simulate the discrete-time system
     let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
 
-    let system_response : Vec<f64> = y_test.row(0).iter().map(|&val| val as f64).collect();
+    let system_response: Vec<f64> = y_test.row(0).iter().map(|&val| val as f64).collect();
 
     system_response
 }
