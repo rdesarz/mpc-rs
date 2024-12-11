@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 
 use crate::mpc::simulator::system_simulate;
 
-pub fn compute_system_response(time_sample_test: usize) -> Vec<f64> {
+pub fn compute_system_response(time_sample_test: usize, model_sampling: f64) -> Vec<f64> {
     // Define parameters
     let m1 = 2.0;
     let m2 = 2.0;
@@ -21,13 +21,10 @@ pub fn compute_system_response(time_sample_test: usize) -> Vec<f64> {
     let mat_bc = na::dmatrix![0.0; 0.0; 0.0; 1.0 / m2];
     let mat_cc = na::dmatrix![1.0, 0.0, 0.0, 0.0];
 
-    // Discretization constant
-    let sampling = 0.05f64;
-
     // Model discretization
     let mat_i = na::DMatrix::<f64>::identity(mat_ac.nrows(), mat_ac.nrows());
-    let mat_a = (mat_i - mat_ac.scale(sampling)).try_inverse().unwrap();
-    let mat_b = &mat_a * mat_bc.scale(sampling);
+    let mat_a = (mat_i - mat_ac.scale(model_sampling)).try_inverse().unwrap();
+    let mat_b = &mat_a * mat_bc.scale(model_sampling);
     let mat_c = mat_cc;
 
     // Compute the system's step response
