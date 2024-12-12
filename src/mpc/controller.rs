@@ -106,8 +106,8 @@ impl<'a> Controller<'a> {
         let mut x_kp1 = na::DVector::zeros(self.model.get_mat_a().nrows());
         let mut y_k = na::DVector::zeros(self.model.get_mat_c().nrows());
 
-        x_kp1.copy_from(&(&self.model.get_mat_a() * state + &self.model.get_mat_b() * control_input));
-        y_k.copy_from(&(&self.model.get_mat_c() * state));
+        x_kp1.copy_from(&(self.model.get_mat_a() * state + self.model.get_mat_b() * control_input));
+        y_k.copy_from(&(self.model.get_mat_c() * state));
 
         (x_kp1, y_k)
     }
@@ -150,14 +150,14 @@ impl<'a> Controller<'a> {
     }
 
     pub fn new(
-        model: &dyn LinearDiscreteModel,
+        model: &'a dyn LinearDiscreteModel,
         f: usize,
         v: usize,
         mat_w3: &na::DMatrix<f64>,
         mat_w4: &na::DMatrix<f64>,
         x0: na::DVector<f64>,
         desired_ctrl_traj: &na::DMatrix<f64>,
-    ) -> Result<Controller, Box<dyn std::error::Error>> {
+    ) -> Result<Controller<'a>, Box<dyn std::error::Error>> {
         // Form the lifted system matrices and vectors
         // the gain matrix is used to compute the solution
         // here we pre-compute it to save computational time

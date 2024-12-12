@@ -1,6 +1,5 @@
 use mpc_rs::mpc::controller::Controller;
 use mpc_rs::mpc::example::Model;
-use mpc_rs::mpc::linear_discrete_model::LinearDiscreteModel;
 use mpc_rs::mpc::simulator::compute_system_response;
 
 use plotters::prelude::*;
