@@ -161,8 +161,15 @@ impl<'a> Controller<'a> {
         // Form the lifted system matrices and vectors
         // the gain matrix is used to compute the solution
         // here we pre-compute it to save computational time
-        let (mat_o, _, gain_matrix) =
-            Self::form_lifted_matrices(model.get_mat_a(), model.get_mat_b(), model.get_mat_c(), f, v, mat_w3, mat_w4)?;
+        let (mat_o, _, gain_matrix) = Self::form_lifted_matrices(
+            model.get_mat_a(),
+            model.get_mat_b(),
+            model.get_mat_c(),
+            f,
+            v,
+            mat_w3,
+            mat_w4,
+        )?;
 
         // We store the state vectors of the controlled state trajectory. States are stored as column
         let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);

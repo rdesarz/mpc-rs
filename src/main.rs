@@ -7,7 +7,6 @@ use plotters::prelude::*;
 extern crate nalgebra as na;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    
     let r = 1usize;
     let m = 1usize; // number of inputs and outputs
 
@@ -16,7 +15,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let k1 = 100.0;
     let k2 = 200.0;
     let d1 = 1.0;
-    let d2= 5.0; 
+    let d2 = 5.0;
     let sampling_dt = 0.05;
 
     let model = Model::new(m1, m2, k1, k2, d1, d2, sampling_dt);
@@ -142,15 +141,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let x0 = x0_test;
 
     // Create the controller
-    let mut mpc = Controller::new(
-        &model,
-        f,
-        v,
-        &mat_w3,
-        &mat_w4,
-        x0,
-        &desired_traj,
-    )?;
+    let mut mpc = Controller::new(&model, f, v, &mat_w3, &mat_w4, x0, &desired_traj)?;
 
     for _ in 0..time_steps - f {
         mpc.compute_control_inputs();
