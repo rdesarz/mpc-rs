@@ -14,10 +14,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let r = 1usize;
     let m = 1usize; // number of inputs and outputs
 
-    let model = Model::new(2.0, 2.0, 100.0, 200.0, 1.0, 5.0, 0.05);
+    let m1 = 2.0;
+    let m2 = 2.0;
+    let k1 = 100.0;
+    let k2 = 200.0;
+    let d1 = 1.0;
+    let d2= 5.0; 
+    let sampling_dt = 0.05;
+
+    let model = Model::new(m1, m2, k1, k2, d1, d2, sampling_dt);
 
     let sampling_time = 10.0f64;
-    let n_samples = (sampling_time / 0.05).floor() as usize;
+    let n_samples = (sampling_time / sampling_dt).floor() as usize;
     let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
     let x0_test = na::DVector::<f64>::zeros(4);
 
