@@ -1,7 +1,6 @@
 extern crate nalgebra as na;
 
 use crate::mpc::linear_discrete_model::LinearDiscreteModel;
-use crate::mpc::simulator::system_simulate;
 
 pub struct Model {
     mat_a: na::DMatrix<f64>,
@@ -53,25 +52,4 @@ impl LinearDiscreteModel for Model {
     fn get_sampling_dt(&self) -> f64 {
         self.sampling_dt
     }
-}
-
-pub fn compute_system_response(model: &impl LinearDiscreteModel, sampling_time: f64) -> Vec<f64> {
-    // Compute the system's step response
-    let n_samples = (sampling_time / model.get_sampling_dt()).floor() as usize;
-
-    let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
-    let x0_test = na::DVector::<f64>::zeros(4);
-
-    // // # simulate the discrete-time system
-    let (y_test, _x_test) = system_simulate(
-        &model.get_mat_a(),
-        &model.get_mat_b(),
-        &model.get_mat_c(),
-        &input_test,
-        &x0_test,
-    );
-
-    let system_response: Vec<f64> = y_test.row(0).iter().map(|&val| val as f64).collect();
-
-    system_response
 }

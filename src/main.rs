@@ -1,5 +1,7 @@
 use mpc_rs::mpc::controller::Controller;
-use mpc_rs::mpc::simulator::system_simulate;
+use mpc_rs::mpc::example::Model;
+use mpc_rs::mpc::linear_discrete_model::LinearDiscreteModel;
+use mpc_rs::mpc::simulator::compute_system_response;
 
 use plotters::prelude::*;
 
@@ -9,57 +11,37 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
     let f = 20usize;
     let v = 20usize;
-    let m1 = 2.0;
-    let m2 = 2.0;
-    let k1 = 100.0;
-    let k2 = 200.0;
-    let d1 = 1.0;
-    let d2 = 5.0;
-    // Define the continuous-time system matrices
-    let mat_ac = na::dmatrix![
-        0.0, 1.0, 0.0, 0.0;
-        -(k1 + k2) / m1, -(d1 + d2) / m1, k2 / m1, d2 / m1;
-        0.0, 0.0, 0.0, 1.0;
-        k2 / m2, d2 / m2, -k2 / m2, -d2 / m2
-    ];
-    let mat_bc = na::dmatrix![0.0; 0.0; 0.0; 1.0 / m2];
-    let mat_cc = na::dmatrix![1.0, 0.0, 0.0, 0.0];
-
     let r = 1usize;
     let m = 1usize; // number of inputs and outputs
-    let _n = 4usize; // state dimension
 
-    // Discretization constant
-    let sampling = 0.05f64;
+    let model = Model::new(2.0, 2.0, 100.0, 200.0, 1.0, 5.0, 0.05);
 
-    // Model discretization
-    let mat_i = na::DMatrix::<f64>::identity(mat_ac.nrows(), mat_ac.nrows());
-    let mat_a = (mat_i - mat_ac.scale(sampling)).try_inverse().unwrap();
-    let mat_b = &mat_a * mat_bc.scale(sampling);
-    let mat_c = mat_cc;
-
-    let time_sample_test = 200;
-
-    // Compute the system's step response
-    let input_test = na::DMatrix::from_element(1, time_sample_test, 10.0f64);
+    let sampling_time = 10.0f64;
+    let n_samples = (sampling_time / 0.05).floor() as usize;
+    let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
     let x0_test = na::DVector::<f64>::zeros(4);
 
-    // // # simulate the discrete-time system
-    let (y_test, _x_test) = system_simulate(&mat_a, &mat_b, &mat_c, &input_test, &x0_test);
+    let system_response = compute_system_response(&model, &input_test, &x0_test);
 
     // Draw the response
     {
         let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
 
-        let max_y = y_test.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
-        let min_y = y_test.iter().cloned().fold(f64::INFINITY, f64::min);
+        let max_y = system_response
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
+        let min_y = system_response
+            .iter()
+            .cloned()
+            .fold(f64::INFINITY, f64::min);
         let mut chart = ChartBuilder::on(&root)
             .caption("System Output Y", ("sans-serif", 20))
             .margin(10)
             .x_label_area_size(30)
             .y_label_area_size(40)
-            .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+            .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
 
         chart.configure_mesh().draw()?;
 
@@ -77,8 +59,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
         // Plot system response
-        let series_y: Vec<(i32, f64)> = y_test
-            .row(0)
+        let series_y: Vec<(i32, f64)> = system_response
             .iter()
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
@@ -153,9 +134,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create the controller
     let mut mpc = Controller::new(
-        mat_a,
-        mat_b,
-        mat_c,
+        model.get_mat_a().clone(),
+        model.get_mat_b().clone(),
+        model.get_mat_c().clone(),
         f,
         v,
         &mat_w3,
@@ -183,7 +164,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .margin(10)
             .x_label_area_size(30)
             .y_label_area_size(40)
-            .build_cartesian_2d(0..y_test.ncols() as i32, min_y..max_y)?;
+            .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
 
         chart.configure_mesh().draw()?;
 
