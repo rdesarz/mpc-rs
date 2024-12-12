@@ -8,9 +8,7 @@ use plotters::prelude::*;
 extern crate nalgebra as na;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Define parameters
-    let f = 20usize;
-    let v = 20usize;
+    
     let r = 1usize;
     let m = 1usize; // number of inputs and outputs
 
@@ -82,6 +80,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .draw()?;
     }
 
+    // Define parameters
+    let f = 20usize;
+    let v = 20usize;
+
     // W1 matrix
     let mut mat_w1 = na::DMatrix::<f64>::zeros(v * m, v * m);
 
@@ -142,9 +144,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Create the controller
     let mut mpc = Controller::new(
-        model.get_mat_a().clone(),
-        model.get_mat_b().clone(),
-        model.get_mat_c().clone(),
+        &model,
         f,
         v,
         &mat_w3,

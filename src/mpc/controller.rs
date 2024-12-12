@@ -1,9 +1,9 @@
 use nalgebra as na;
 
-pub struct Controller {
-    mat_a: na::DMatrix<f64>,
-    mat_b: na::DMatrix<f64>,
-    mat_c: na::DMatrix<f64>,
+use crate::mpc::linear_discrete_model::LinearDiscreteModel;
+
+pub struct Controller<'a> {
+    model: &'a dyn LinearDiscreteModel,
     f: usize,
     current_timestep: usize,
     mat_o: na::DMatrix<f64>,
@@ -14,7 +14,7 @@ pub struct Controller {
     pub inputs: na::DMatrix<f64>,
 }
 
-impl Controller {
+impl<'a> Controller<'a> {
     pub fn form_lifted_matrices(
         mat_a: &na::DMatrix<f64>,
         mat_b: &na::DMatrix<f64>,
@@ -103,11 +103,11 @@ impl Controller {
         control_input: &na::DVector<f64>,
         state: &na::DVector<f64>,
     ) -> (na::DVector<f64>, na::DVector<f64>) {
-        let mut x_kp1 = na::DVector::zeros(self.mat_a.nrows());
-        let mut y_k = na::DVector::zeros(self.mat_c.nrows());
+        let mut x_kp1 = na::DVector::zeros(self.model.get_mat_a().nrows());
+        let mut y_k = na::DVector::zeros(self.model.get_mat_c().nrows());
 
-        x_kp1.copy_from(&(&self.mat_a * state + &self.mat_b * control_input));
-        y_k.copy_from(&(&self.mat_c * state));
+        x_kp1.copy_from(&(&self.model.get_mat_a() * state + &self.model.get_mat_b() * control_input));
+        y_k.copy_from(&(&self.model.get_mat_c() * state));
 
         (x_kp1, y_k)
     }
@@ -150,9 +150,7 @@ impl Controller {
     }
 
     pub fn new(
-        mat_a: na::DMatrix<f64>,
-        mat_b: na::DMatrix<f64>,
-        mat_c: na::DMatrix<f64>,
+        model: &dyn LinearDiscreteModel,
         f: usize,
         v: usize,
         mat_w3: &na::DMatrix<f64>,
@@ -164,7 +162,7 @@ impl Controller {
         // the gain matrix is used to compute the solution
         // here we pre-compute it to save computational time
         let (mat_o, _, gain_matrix) =
-            Self::form_lifted_matrices(&mat_a, &mat_b, &mat_c, f, v, mat_w3, mat_w4)?;
+            Self::form_lifted_matrices(model.get_mat_a(), model.get_mat_b(), model.get_mat_c(), f, v, mat_w3, mat_w4)?;
 
         // We store the state vectors of the controlled state trajectory. States are stored as column
         let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
@@ -174,13 +172,11 @@ impl Controller {
         let inputs = na::DMatrix::<f64>::zeros(0, 0);
 
         // // # we store the output vectors of the controlled state trajectory
-        let mut outputs = na::DMatrix::<f64>::zeros(1, mat_c.nrows());
-        outputs.row_mut(0).copy_from(&(&mat_c * x0));
+        let mut outputs = na::DMatrix::<f64>::zeros(1, model.get_mat_c().nrows());
+        outputs.row_mut(0).copy_from(&(model.get_mat_c() * x0));
 
         Ok(Controller {
-            mat_a: mat_a,
-            mat_b: mat_b,
-            mat_c: mat_c,
+            model: model,
             f: f,
             desired_ctrl_traj_total: desired_ctrl_traj.clone(),
             current_timestep: 0,
