@@ -39,7 +39,7 @@ pub fn compute_system_response(
     input: &na::DMatrix<f64>,
     initial_state: &na::DVector<f64>,
 ) -> Vec<f64> {
-    // // # simulate the discrete-time system
+    // simulate the discrete-time system
     let (y_test, _x_test) = system_simulate(model, &input, &initial_state);
 
     let system_response: Vec<f64> = y_test.row(0).iter().map(|&val| val as f64).collect();
