@@ -153,11 +153,53 @@ impl<'a> Controller<'a> {
         model: &'a dyn LinearDiscreteModel,
         f: usize,
         v: usize,
-        mat_w3: &na::DMatrix<f64>,
-        mat_w4: &na::DMatrix<f64>,
+        q0: f64,
+        q_other: f64,
+        pred_weight: f64,
         x0: na::DVector<f64>,
         desired_ctrl_traj: &na::DMatrix<f64>,
     ) -> Result<Controller<'a>, Box<dyn std::error::Error>> {
+        let m = model.get_mat_b().ncols();
+        let r = model.get_mat_c().nrows();
+
+        let mut mat_w1 = na::DMatrix::<f64>::zeros(v * m, v * m);
+        mat_w1
+            .view_range_mut(0..m, 0..m)
+            .copy_from(&na::DMatrix::identity(m, m));
+
+        for i in 1..v {
+            mat_w1
+                .view_range_mut(i * m..(i + 1) * m, i * m..(i + 1) * m)
+                .copy_from(&na::DMatrix::identity(m, m));
+            mat_w1
+                .view_range_mut(i * m..(i + 1) * m, (i - 1) * m..i * m)
+                .copy_from(&(na::DMatrix::identity(m, m).scale(-1.0)));
+        }
+
+        // W2 matrix (input penalization weight)
+        let mat_q0 = na::DMatrix::from_element(m, m, q0);
+        let mat_q_other = na::DMatrix::from_element(m, m, q_other);
+
+        let mut mat_w2 = na::DMatrix::<f64>::zeros(v * m, v * m);
+
+        mat_w2.view_range_mut(0..m, 0..m).copy_from(&mat_q0);
+
+        for i in 1..v {
+            mat_w2
+                .view_range_mut(i * m..(i + 1) * m, i * m..(i + 1) * m)
+                .copy_from(&mat_q_other);
+        }
+
+        let mat_w3 = mat_w1.transpose() * (mat_w2 * mat_w1);
+
+        let mut mat_w4 = na::DMatrix::<f64>::zeros(f * r, f * r);
+
+        for i in 0..f {
+            mat_w4
+                .view_range_mut(i * r..(i + 1) * r, i * r..(i + 1) * r)
+                .copy_from(&na::DMatrix::from_element(r, r, pred_weight));
+        }
+
         // Form the lifted system matrices and vectors
         // the gain matrix is used to compute the solution
         // here we pre-compute it to save computational time
@@ -167,8 +209,8 @@ impl<'a> Controller<'a> {
             model.get_mat_c(),
             f,
             v,
-            mat_w3,
-            mat_w4,
+            &mat_w3,
+            &mat_w4,
         )?;
 
         // We store the state vectors of the controlled state trajectory. States are stored as column
