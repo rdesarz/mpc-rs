@@ -2,7 +2,7 @@ extern crate nalgebra as na;
 
 use crate::mpc::linear_discrete_model::LinearDiscreteModel;
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Model {
     mat_a: na::DMatrix<f64>,
     mat_b: na::DMatrix<f64>,
