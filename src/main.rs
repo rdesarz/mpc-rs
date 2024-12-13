@@ -1,5 +1,5 @@
 use mpc_rs::mpc::controller::Controller;
-use mpc_rs::mpc::example::Model;
+use mpc_rs::mpc::example::{Model, generate_pulse_trajectory};
 use mpc_rs::mpc::simulator::compute_system_response;
 
 use plotters::prelude::*;
@@ -27,17 +27,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define parameters
     let f = 20usize;
     let v = 20usize;
-
     let time_steps = 300;
 
     // Define a pulse trajectory
-    let mut desired_traj = na::DMatrix::<f64>::zeros(time_steps, 1);
-    desired_traj
-        .view_range_mut(0..100, 0..1)
-        .copy_from(&na::DMatrix::from_element(100, 1, 1.0));
-    desired_traj
-        .view_range_mut(200..300, 0..1)
-        .copy_from(&na::DMatrix::from_element(100, 1, 1.0));
+    let trajectory = generate_pulse_trajectory(time_steps);
 
     // Set the initial state
     let x0 = x0_test;
@@ -47,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let q0 = 0.0000000011f64;
     let q_other = 0.0001f64;
 
-    let mut mpc = Controller::new(&model, f, v, q0, q_other, pred_weight, x0, &desired_traj)?;
+    let mut mpc = Controller::new(&model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
     for _ in 0..time_steps - f {
         mpc.compute_control_inputs();
