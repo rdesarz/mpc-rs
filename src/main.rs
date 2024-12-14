@@ -4,6 +4,9 @@ use mpc_rs::mpc::simulator::compute_system_response;
 
 use plotters::prelude::*;
 
+use std::rc::Rc;
+use std::borrow::Borrow;
+
 extern crate nalgebra as na;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,14 +18,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let d2 = 5.0;
     let sampling_dt = 0.05;
 
-    let model = Model::new(m1, m2, k1, k2, d1, d2, sampling_dt);
+    let model= Rc::new(Model::new(m1, m2, k1, k2, d1, d2, sampling_dt));
 
     let sampling_time = 10.0f64;
     let n_samples = (sampling_time / sampling_dt).floor() as usize;
     let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
     let x0_test = na::DVector::<f64>::zeros(4);
 
-    let system_response = compute_system_response(&model, &input_test, &x0_test);
+    let system_response = compute_system_response(<Rc<Model> as Borrow<Model>>::borrow(&model), &input_test, &x0_test);
 
     // Define parameters
     let f = 20usize;
@@ -40,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let q0 = 0.0000000011f64;
     let q_other = 0.0001f64;
 
-    let mut mpc = Controller::new(&model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
+    let mut mpc = Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
     for _ in 0..time_steps - f {
         mpc.compute_control_inputs();

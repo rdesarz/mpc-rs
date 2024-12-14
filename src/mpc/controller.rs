@@ -1,9 +1,10 @@
 use nalgebra as na;
+use std::rc::Rc;
 
 use crate::mpc::linear_discrete_model::LinearDiscreteModel;
 
-pub struct Controller<'a> {
-    model: &'a dyn LinearDiscreteModel,
+pub struct Controller {
+    model: Rc<dyn LinearDiscreteModel>,
     f: usize,
     current_timestep: usize,
     mat_o: na::DMatrix<f64>,
@@ -14,7 +15,7 @@ pub struct Controller<'a> {
     pub inputs: na::DMatrix<f64>,
 }
 
-impl<'a> Controller<'a> {
+impl Controller {
     pub fn form_lifted_matrices(
         mat_a: &na::DMatrix<f64>,
         mat_b: &na::DMatrix<f64>,
@@ -150,7 +151,7 @@ impl<'a> Controller<'a> {
     }
 
     pub fn new(
-        model: &'a dyn LinearDiscreteModel,
+        model: Rc<dyn LinearDiscreteModel>,
         f: usize,
         v: usize,
         q0: f64,
@@ -158,7 +159,7 @@ impl<'a> Controller<'a> {
         pred_weight: f64,
         x0: na::DVector<f64>,
         desired_ctrl_traj: &na::DMatrix<f64>,
-    ) -> Result<Controller<'a>, Box<dyn std::error::Error>> {
+    ) -> Result<Controller, Box<dyn std::error::Error>> {
         let m = model.get_mat_b().ncols();
         let r = model.get_mat_c().nrows();
 
