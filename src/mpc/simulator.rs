@@ -8,10 +8,10 @@ pub fn system_simulate(
     x0: &na::DVector<f64>,
 ) -> (na::DMatrix<f64>, na::DMatrix<f64>) {
     let sim_time = mat_u.ncols();
-    let n = model.get_mat_a().nrows();
-    let r = model.get_mat_c().nrows();
-    let mut mat_x = na::DMatrix::<f64>::zeros(n, sim_time + 1);
-    let mut mat_y = na::DMatrix::<f64>::zeros(r, sim_time);
+    let n_state = model.get_mat_a().nrows();
+    let n_output = model.get_mat_c().nrows();
+    let mut mat_x = na::DMatrix::<f64>::zeros(n_state, sim_time + 1);
+    let mut mat_y = na::DMatrix::<f64>::zeros(n_output, sim_time);
     for i in 0..sim_time {
         if i == 0 {
             mat_x.column_mut(i).copy_from(&x0);
