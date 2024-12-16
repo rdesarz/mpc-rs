@@ -2,10 +2,10 @@ pub mod mpc {
     use nalgebra as na;
     use std::rc::Rc;
 
-    use crate::control::model::LinearDiscreteModel;
+    use crate::control::model::DiscreteStateSpaceModel;
 
     pub struct Controller {
-        model: Rc<dyn LinearDiscreteModel>,
+        model: Rc<dyn DiscreteStateSpaceModel>,
         f: usize,
         current_timestep: usize,
         mat_o: na::DMatrix<f64>,
@@ -157,7 +157,7 @@ pub mod mpc {
         }
 
         pub fn new(
-            model: Rc<dyn LinearDiscreteModel>,
+            model: Rc<dyn DiscreteStateSpaceModel>,
             f: usize,
             v: usize,
             q0: f64,

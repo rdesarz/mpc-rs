@@ -1,9 +1,9 @@
 use nalgebra as na;
 
-use crate::control::linear_discrete_model::LinearDiscreteModel;
+use crate::control::model::DiscreteStateSpaceModel;
 
 pub fn system_simulate(
-    model: &impl LinearDiscreteModel,
+    model: &impl DiscreteStateSpaceModel,
     mat_u: &na::DMatrix<f64>,
     x0: &na::DVector<f64>,
 ) -> (na::DMatrix<f64>, na::DMatrix<f64>) {
@@ -35,7 +35,7 @@ pub fn system_simulate(
 }
 
 pub fn compute_system_response(
-    model: &impl LinearDiscreteModel,
+    model: &impl DiscreteStateSpaceModel,
     input: &na::DMatrix<f64>,
     initial_state: &na::DVector<f64>,
 ) -> Vec<f64> {

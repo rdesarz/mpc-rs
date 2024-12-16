@@ -10,7 +10,7 @@ pub trait DiscreteStateSpaceModel {
 pub mod dc_motor {
 
     extern crate nalgebra as na;
-    use crate::control::linear_discrete_model::LinearDiscreteModel;
+    use crate::control::model::DiscreteStateSpaceModel;
     use std::default::Default;
 
     pub struct Parameters {
@@ -66,7 +66,7 @@ pub mod dc_motor {
         }
     }
 
-    impl LinearDiscreteModel for Model {
+    impl DiscreteStateSpaceModel for Model {
         fn get_mat_a(&self) -> &na::DMatrix<f64> {
             &self.mat_a
         }
@@ -90,7 +90,7 @@ pub mod mpc {
 
     use std::default::Default;
 
-    use crate::control::linear_discrete_model::LinearDiscreteModel;
+    use crate::control::model::DiscreteStateSpaceModel;
 
     pub struct Parameters {
         m1: f64,
@@ -149,7 +149,7 @@ pub mod mpc {
         }
     }
 
-    impl LinearDiscreteModel for Model {
+    impl DiscreteStateSpaceModel for Model {
         fn get_mat_a(&self) -> &na::DMatrix<f64> {
             &self.mat_a
         }

@@ -1,4 +1,4 @@
-use mpc_rs::control::controller::Controller;
+use mpc_rs::control::controller;
 use mpc_rs::control::model;
 use mpc_rs::control::simulator;
 use mpc_rs::control::trajectory;
@@ -42,7 +42,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let q0 = 0.0000000011f64;
     let q_other = 0.0001f64;
 
-    let mut mpc = Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
+    let mut mpc =
+        controller::mpc::Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
     for _ in 0..time_steps - f {
         mpc.compute_control_inputs();
