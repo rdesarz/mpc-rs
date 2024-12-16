@@ -1,7 +1,7 @@
 use nalgebra as na;
 use std::rc::Rc;
 
-use crate::mpc::linear_discrete_model::LinearDiscreteModel;
+use crate::control::linear_discrete_model::LinearDiscreteModel;
 
 pub struct Controller {
     model: Rc<dyn LinearDiscreteModel>,

@@ -1,1 +1,1 @@
-pub mod mpc;
+pub mod control;

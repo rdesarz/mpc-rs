@@ -1,5 +1,5 @@
 pub mod controller;
-pub mod example;
+pub mod model;
 pub mod linear_discrete_model;
 pub mod simulator;
-pub mod dc_motor_model;
+pub mod trajectory;

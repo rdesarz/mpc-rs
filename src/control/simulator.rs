@@ -1,6 +1,6 @@
 use nalgebra as na;
 
-use crate::mpc::linear_discrete_model::LinearDiscreteModel;
+use crate::control::linear_discrete_model::LinearDiscreteModel;
 
 pub fn system_simulate(
     model: &impl LinearDiscreteModel,

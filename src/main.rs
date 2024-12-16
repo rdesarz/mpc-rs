@@ -1,7 +1,7 @@
-use mpc_rs::mpc::controller::Controller;
-use mpc_rs::mpc::example::generate_pulse_trajectory; //, Model};
-use mpc_rs::mpc::dc_motor_model::Model;
-use mpc_rs::mpc::simulator::compute_system_response;
+use mpc_rs::control::controller::Controller;
+use mpc_rs::control::model;
+use mpc_rs::control::trajectory;
+use mpc_rs::control::simulator;
 
 use plotters::prelude::*;
 
@@ -20,15 +20,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let sampling_dt = 0.05;
 
-    let model = Rc::new(Model::new(b, J, Ke, L, R, sampling_dt));
+    let model = Rc::new(model::dc_motor::Model::new(b, J, Ke, L, R, sampling_dt));
 
     let sampling_time = 10.0f64;
     let n_samples = (sampling_time / sampling_dt).floor() as usize;
     let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
     let x0_test = na::DVector::<f64>::zeros(2);
 
-    let system_response = compute_system_response(
-        <Rc<Model> as Borrow<Model>>::borrow(&model),
+    let system_response = simulator::compute_system_response(
+        <Rc<model::dc_motor::Model> as Borrow<model::dc_motor::Model>>::borrow(&model),
         &input_test,
         &x0_test,
     );
@@ -39,21 +39,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let time_steps = 300;
 
     // Define a pulse trajectory
-    let trajectory = generate_pulse_trajectory(time_steps);
+    let trajectory = trajectory::generate_pulse_trajectory(time_steps);
 
     // // Set the initial state
-    // let x0 = x0_test;
+    let x0 = x0_test;
 
-    // // Create the controller
-    // let pred_weight = 10f64;
-    // let q0 = 0.0000000011f64;
-    // let q_other = 0.0001f64;
+    // Create the controller
+    let pred_weight = 10f64;
+    let q0 = 0.0000000011f64;
+    let q_other = 0.0001f64;
 
-    // let mut mpc = Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
+    let mut mpc = Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
-    // for _ in 0..time_steps - f {
-    //     mpc.compute_control_inputs();
-    // }
+    for _ in 0..time_steps - f {
+        mpc.compute_control_inputs();
+    }
 
     // Draw the step response
     {
@@ -107,70 +107,70 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     // Draw the control
-    // {
-    //     let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
-    //     root.fill(&WHITE)?;
+    {
+        let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
+        root.fill(&WHITE)?;
 
-    //     let max_y = mpc
-    //         .outputs
-    //         .iter()
-    //         .cloned()
-    //         .fold(f64::NEG_INFINITY, f64::max);
-    //     let min_y = mpc.outputs.iter().cloned().fold(f64::INFINITY, f64::min);
-    //     let mut chart = ChartBuilder::on(&root)
-    //         .caption("System Output Y", ("sans-serif", 20))
-    //         .margin(10)
-    //         .x_label_area_size(30)
-    //         .y_label_area_size(40)
-    //         .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
+        let max_y = mpc
+            .outputs
+            .iter()
+            .cloned()
+            .fold(f64::NEG_INFINITY, f64::max);
+        let min_y = mpc.outputs.iter().cloned().fold(f64::INFINITY, f64::min);
+        let mut chart = ChartBuilder::on(&root)
+            .caption("System Output Y", ("sans-serif", 20))
+            .margin(10)
+            .x_label_area_size(30)
+            .y_label_area_size(40)
+            .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
 
-    //     chart.configure_mesh().draw()?;
+        chart.configure_mesh().draw()?;
 
-    //     // Plot input
-    //     let inputs_series: Vec<(i32, f64)> = mpc
-    //         .inputs
-    //         .row(0)
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(i, &val)| (i as i32, val as f64))
-    //         .collect();
+        // Plot input
+        let inputs_series: Vec<(i32, f64)> = mpc
+            .inputs
+            .row(0)
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
 
-    //     chart
-    //         .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
-    //         .label(format!("Input"))
-    //         .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
+        chart
+            .draw_series(LineSeries::new(inputs_series, &Palette99::pick(0)))?
+            .label(format!("Input"))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
-    //     // Plot system response
-    //     let outputs_serie: Vec<(i32, f64)> = mpc
-    //         .outputs
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(i, &val)| (i as i32, val as f64))
-    //         .collect();
+        // Plot system response
+        let outputs_serie: Vec<(i32, f64)> = mpc
+            .outputs
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
 
-    //     chart
-    //         .draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?
-    //         .label(format!("Output"))
-    //         .legend(move |(x, y)| PathElement::new([(x, y), (x + 40, y)], &Palette99::pick(1)));
+        chart
+            .draw_series(LineSeries::new(outputs_serie, &Palette99::pick(1)))?
+            .label(format!("Output"))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 40, y)], &Palette99::pick(1)));
 
-    //     let traj_series: Vec<(i32, f64)> = mpc
-    //         .desired_ctrl_traj_total
-    //         .iter()
-    //         .enumerate()
-    //         .map(|(i, &val)| (i as i32, val as f64))
-    //         .collect();
+        let traj_series: Vec<(i32, f64)> = mpc
+            .desired_ctrl_traj_total
+            .iter()
+            .enumerate()
+            .map(|(i, &val)| (i as i32, val as f64))
+            .collect();
 
-    //     chart
-    //         .draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?
-    //         .label(format!("Desired trajectory"))
-    //         .legend(move |(x, y)| PathElement::new([(x, y), (x + 60, y)], &Palette99::pick(2)));
+        chart
+            .draw_series(LineSeries::new(traj_series, &Palette99::pick(2)))?
+            .label(format!("Desired trajectory"))
+            .legend(move |(x, y)| PathElement::new([(x, y), (x + 60, y)], &Palette99::pick(2)));
 
-    //     chart
-    //         .configure_series_labels()
-    //         .background_style(&WHITE)
-    //         .border_style(&BLACK)
-    //         .draw()?;
-    // }
+        chart
+            .configure_series_labels()
+            .background_style(&WHITE)
+            .border_style(&BLACK)
+            .draw()?;
+    }
 
     Ok(())
 }
