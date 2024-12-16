@@ -1,7 +1,5 @@
 extern crate nalgebra as na;
 
-use crate::control::linear_discrete_model::LinearDiscreteModel;
-
 pub fn generate_pulse_trajectory(time_steps: usize) -> na::DMatrix<f64> {
     let mut traj = na::DMatrix::<f64>::zeros(time_steps, 1);
     traj.view_range_mut(0..time_steps / 3, 0..1)

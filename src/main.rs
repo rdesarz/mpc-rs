@@ -11,16 +11,9 @@ use std::rc::Rc;
 extern crate nalgebra as na;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let J = 0.01f64; // [kg.m^2] Moment of inertia of the robot
-    let b = 0.1f64;  // [N.m.s] Motor discous friction constant
-    let Ke = 0.01f64; // [V/rad/sec] Electromotive force constant
-    let Kt = 0.01f64; // [N.m/Amp] Motor torque constant
-    let R = 1.0f64; // [Ohm] Electric resistance       
-    let L = 0.5f64; // [H] Electric inductance 
-
     let sampling_dt = 0.05;
-
-    let model = Rc::new(model::dc_motor::Model::new(b, J, Ke, L, R, sampling_dt));
+    let params = model::dc_motor::Parameters::default();
+    let model = Rc::new(model::dc_motor::Model::new(params, sampling_dt));
 
     let sampling_time = 10.0f64;
     let n_samples = (sampling_time / sampling_dt).floor() as usize;

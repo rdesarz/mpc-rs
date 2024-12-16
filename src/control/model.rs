@@ -7,6 +7,27 @@ use std::default::Default;
     
 use crate::control::linear_discrete_model::LinearDiscreteModel;
 
+pub struct Parameters
+    {
+        b: f64,
+        j: f64,
+        k: f64,
+        l: f64,
+        r: f64,
+    }
+
+    impl Default for Parameters {
+        fn default() -> Parameters {
+            Parameters {
+                b: 0.1,
+                j: 0.01,
+                k: 0.01,
+                l: 0.5,
+                r: 1.0,
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Model {
     mat_a: na::DMatrix<f64>,
@@ -16,13 +37,13 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(b: f64, J: f64, K: f64, L: f64, R: f64, sampling_dt: f64) -> Model {
+    pub fn new(params: Parameters, sampling_dt: f64) -> Model {
         // Define the continuous-time system matrices
         let mat_ac = na::dmatrix![
-            -b / J, K / J;
-            -K / L, -R / L;
+            -params.b / params.j, params.k / params.j;
+            -params.k / params.l, -params.r / params.l;
         ];
-        let mat_bc = na::dmatrix![0.0; 1.0 / L];
+        let mat_bc = na::dmatrix![0.0; 1.0 / params.l];
         let mat_cc = na::dmatrix![1.0, 0.0];
 
         // Model discretization
