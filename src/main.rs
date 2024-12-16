@@ -1,7 +1,7 @@
 use mpc_rs::control::controller::Controller;
 use mpc_rs::control::model;
-use mpc_rs::control::trajectory;
 use mpc_rs::control::simulator;
+use mpc_rs::control::trajectory;
 
 use plotters::prelude::*;
 
