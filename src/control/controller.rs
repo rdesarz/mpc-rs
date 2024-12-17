@@ -118,7 +118,7 @@ pub mod mpc {
             (x_kp1, y_k)
         }
 
-        pub fn compute_control_inputs(&mut self) {
+        pub fn compute_control_input(&mut self, state: ) -> () {
             // Extract the segment of the desired control trajectory
             let desired_ctrl_traj = self
                 .desired_ctrl_traj_total
@@ -134,23 +134,6 @@ pub mod mpc {
             let input_sequence_computed = &self.gain_matrix * vec_s;
             let mut input_applied = na::DVector::<f64>::zeros(1);
             input_applied[0] = input_sequence_computed[(0, 0)];
-
-            // Compute the next state and output
-            let (state_kp1, output_k) = self.propagate_dynamics(
-                &input_applied,
-                &self.states.column(self.current_timestep).into_owned(),
-            );
-
-            // Append the lists
-            self.states = na::stack![self.states, state_kp1];
-            self.outputs = na::stack![self.outputs, output_k];
-
-            if self.inputs.shape() == (0, 0) {
-                self.inputs.resize_mut(1, input_applied.nrows(), 0.);
-                self.inputs.view_range_mut(0, ..).copy_from(&input_applied);
-            } else {
-                self.inputs = na::stack![self.inputs, input_applied];
-            }
 
             // Increment the time step
             self.current_timestep = self.current_timestep + 1;

@@ -37,6 +37,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // // Set the initial state
     let x0 = x0_test;
 
+    let states: na::DMatrix<f64>,
+    pub desired_ctrl_traj_total: na::DMatrix<f64>,
+    pub outputs: na::DMatrix<f64>,
+    pub inputs: na::DMatrix<f64>,
+
+    // Initialize the states
+    let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
+    states.column_mut(0).copy_from(&x0);
+
+    // We store the computed inputs
+    let inputs = na::DMatrix::<f64>::zeros(0, 0);
+
+    // We store the output vectors of the controlled state trajectory
+    let mut outputs = na::DMatrix::<f64>::zeros(1, model.get_mat_c().nrows());
+    outputs.row_mut(0).copy_from(&(model.get_mat_c() * x0));
+
     // Create the controller
     let pred_weight = 10f64;
     let q0 = 0.0000000011f64;
@@ -46,7 +62,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         controller::mpc::Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
     for _ in 0..time_steps - f {
-        mpc.compute_control_inputs();
+        // Compute input
+        let input = mpc.compute_control_input();
+
+        // Compute the next state and output
+        let (next_state, next_output) = self.propagate_dynamics(
+            &input_applied,
+            &self.states.column(self.current_timestep).into_owned(),
+        );
+
+        // Append the lists
+        self.states = na::stack![self.states, state_kp1];
+        self.outputs = na::stack![self.outputs, output_k];
+
+        if self.inputs.shape() == (0, 0) {
+            self.inputs.resize_mut(1, input_applied.nrows(), 0.);
+            self.inputs.view_range_mut(0, ..).copy_from(&input_applied);
+        } else {
+            self.inputs = na::stack![self.inputs, input_applied];
+        }
     }
 
     // Draw the step response
