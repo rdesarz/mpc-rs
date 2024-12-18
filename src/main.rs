@@ -1,6 +1,6 @@
 use mpc_rs::control::controller;
 use mpc_rs::control::model;
-use mpc_rs::control::model::DiscreteStateSpaceModel
+use mpc_rs::control::model::DiscreteStateSpaceModel;
 use mpc_rs::control::simulator;
 use mpc_rs::control::trajectory;
 
@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     states.column_mut(0).copy_from(&x0);
 
     // We store the computed inputs
-    let inputs = na::DMatrix::<f64>::zeros(0, 0);
+    let mut inputs = na::DMatrix::<f64>::zeros(0, 0);
 
     // We store the output vectors of the controlled state trajectory
     let mut outputs = na::DMatrix::<f64>::zeros(1, model.get_mat_c().nrows());
@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let q_other = 0.0001f64;
 
     let mut mpc =
-        controller::mpc::Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
+        controller::mpc::Controller::new(model, f, v, q0, q_other, pred_weight, &trajectory)?;
 
     for current_timestep in 0..time_steps - f {
         // Compute input

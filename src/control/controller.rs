@@ -141,7 +141,6 @@ pub mod mpc {
             q0: f64,
             q_other: f64,
             pred_weight: f64,
-            x0: na::DVector<f64>,
             desired_ctrl_traj: &na::DMatrix<f64>,
         ) -> Result<Controller, Box<dyn std::error::Error>> {
             let m = model.get_mat_b().ncols();
