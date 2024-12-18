@@ -1,5 +1,6 @@
 use mpc_rs::control::controller;
 use mpc_rs::control::model;
+use mpc_rs::control::model::DiscreteStateSpaceModel
 use mpc_rs::control::simulator;
 use mpc_rs::control::trajectory;
 
@@ -37,11 +38,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // // Set the initial state
     let x0 = x0_test;
 
-    let states: na::DMatrix<f64>,
-    pub desired_ctrl_traj_total: na::DMatrix<f64>,
-    pub outputs: na::DMatrix<f64>,
-    pub inputs: na::DMatrix<f64>,
-
     // Initialize the states
     let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
     states.column_mut(0).copy_from(&x0);
@@ -61,25 +57,25 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut mpc =
         controller::mpc::Controller::new(model, f, v, q0, q_other, pred_weight, x0, &trajectory)?;
 
-    for _ in 0..time_steps - f {
+    for current_timestep in 0..time_steps - f {
         // Compute input
-        let input = mpc.compute_control_input();
+        let input = mpc.compute_control_input(current_timestep, &states.column(current_timestep).into_owned());
 
         // Compute the next state and output
-        let (next_state, next_output) = self.propagate_dynamics(
-            &input_applied,
-            &self.states.column(self.current_timestep).into_owned(),
+        let (next_state, next_output) = mpc.propagate_dynamics(
+            &input,
+            &states.column(current_timestep).into_owned(),
         );
 
         // Append the lists
-        self.states = na::stack![self.states, state_kp1];
-        self.outputs = na::stack![self.outputs, output_k];
+        states = na::stack![states, next_state];
+        outputs = na::stack![outputs, next_output];
 
-        if self.inputs.shape() == (0, 0) {
-            self.inputs.resize_mut(1, input_applied.nrows(), 0.);
-            self.inputs.view_range_mut(0, ..).copy_from(&input_applied);
+        if inputs.shape() == (0, 0) {
+            inputs.resize_mut(1, input.nrows(), 0.);
+            inputs.view_range_mut(0, ..).copy_from(&input);
         } else {
-            self.inputs = na::stack![self.inputs, input_applied];
+            inputs = na::stack![inputs, input];
         }
     }
 
@@ -139,12 +135,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new("control.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
 
-        let max_y = mpc
-            .outputs
+        let max_y = 
+            outputs
             .iter()
             .cloned()
             .fold(f64::NEG_INFINITY, f64::max);
-        let min_y = mpc.outputs.iter().cloned().fold(f64::INFINITY, f64::min);
+        let min_y = outputs.iter().cloned().fold(f64::INFINITY, f64::min);
         let mut chart = ChartBuilder::on(&root)
             .caption("System Output Y", ("sans-serif", 20))
             .margin(10)
@@ -155,8 +151,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         chart.configure_mesh().draw()?;
 
         // Plot input
-        let inputs_series: Vec<(i32, f64)> = mpc
-            .inputs
+        let inputs_series: Vec<(i32, f64)> = 
+            inputs
             .row(0)
             .iter()
             .enumerate()
@@ -169,8 +165,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
         // Plot system response
-        let outputs_serie: Vec<(i32, f64)> = mpc
-            .outputs
+        let outputs_serie: Vec<(i32, f64)> = 
+            outputs
             .iter()
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))

@@ -7,13 +7,9 @@ pub mod mpc {
     pub struct Controller {
         model: Rc<dyn DiscreteStateSpaceModel>,
         f: usize,
-        current_timestep: usize,
         mat_o: na::DMatrix<f64>,
         gain_matrix: na::DMatrix<f64>,
-        pub states: na::DMatrix<f64>,
         pub desired_ctrl_traj_total: na::DMatrix<f64>,
-        pub outputs: na::DMatrix<f64>,
-        pub inputs: na::DMatrix<f64>,
     }
 
     impl Controller {
@@ -118,16 +114,16 @@ pub mod mpc {
             (x_kp1, y_k)
         }
 
-        pub fn compute_control_input(&mut self, state: ) -> () {
+        pub fn compute_control_input(&mut self, timestep: usize, state: &na::DVector::<f64>) -> na::DVector::<f64> {
             // Extract the segment of the desired control trajectory
             let desired_ctrl_traj = self
                 .desired_ctrl_traj_total
-                .view_range(self.current_timestep..self.current_timestep + self.f, ..)
+                .view_range(timestep..timestep + self.f, ..)
                 .into_owned();
 
             // Compute the vector s
             let vec_s = (desired_ctrl_traj
-                - &self.mat_o * self.states.column(self.current_timestep))
+                - &self.mat_o * state)
             .into_owned();
 
             // Compute the control sequence
@@ -135,8 +131,7 @@ pub mod mpc {
             let mut input_applied = na::DVector::<f64>::zeros(1);
             input_applied[0] = input_sequence_computed[(0, 0)];
 
-            // Increment the time step
-            self.current_timestep = self.current_timestep + 1;
+            input_applied
         }
 
         pub fn new(
@@ -203,27 +198,12 @@ pub mod mpc {
                 &mat_w4,
             )?;
 
-            // We store the state vectors of the controlled state trajectory. States are stored as column
-            let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
-            states.column_mut(0).copy_from(&x0);
-
-            // // We store the computed inputs
-            let inputs = na::DMatrix::<f64>::zeros(0, 0);
-
-            // // # we store the output vectors of the controlled state trajectory
-            let mut outputs = na::DMatrix::<f64>::zeros(1, model.get_mat_c().nrows());
-            outputs.row_mut(0).copy_from(&(model.get_mat_c() * x0));
-
             Ok(Controller {
                 model: model,
                 f: f,
                 desired_ctrl_traj_total: desired_ctrl_traj.clone(),
-                current_timestep: 0,
                 mat_o: mat_o,
                 gain_matrix: gain_matrix,
-                states: states,
-                inputs: inputs,
-                outputs: outputs,
             })
         }
     }
