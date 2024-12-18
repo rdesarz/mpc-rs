@@ -2,7 +2,7 @@ use nalgebra as na;
 
 use crate::control::model::DiscreteStateSpaceModel;
 
-pub fn system_simulate(
+fn system_simulate(
     model: &impl DiscreteStateSpaceModel,
     mat_u: &na::DMatrix<f64>,
     x0: &na::DVector<f64>,
@@ -45,4 +45,19 @@ pub fn compute_system_response(
     let system_response: Vec<f64> = y_test.row(0).iter().map(|&val| val as f64).collect();
 
     system_response
+}
+
+pub fn step(model: &impl DiscreteStateSpaceModel,
+            duration: f64) -> (na::DMatrix<f64>, na::DMatrix<f64>, na::DMatrix<f64>)
+{
+    // Initial state is zero for a step response
+    let initial_state = na::DVector::<f64>::zeros(model.get_mat_a().nrows());
+
+    // Generate step for given duration
+    let n_samples = (duration / model.get_sampling_dt()).floor() as usize;
+    let input = na::DMatrix::from_element(1, n_samples, 1.0f64);
+
+    let (response, states) = system_simulate(model, &input, &initial_state);
+
+    (response, input, states)
 }

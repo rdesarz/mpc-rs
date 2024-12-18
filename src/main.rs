@@ -16,16 +16,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let params = model::dc_motor::Parameters::default();
     let model = Rc::new(model::dc_motor::Model::new(params, sampling_dt));
 
-    let sampling_time = 10.0f64;
-    let n_samples = (sampling_time / sampling_dt).floor() as usize;
-    let input_test = na::DMatrix::from_element(1, n_samples, 10.0f64);
-    let x0_test = na::DVector::<f64>::zeros(2);
-
-    let system_response = simulator::compute_system_response(
-        <Rc<model::dc_motor::Model> as Borrow<model::dc_motor::Model>>::borrow(&model),
-        &input_test,
-        &x0_test,
-    );
+    let (step_response, step, _) = simulator::step(<Rc<model::dc_motor::Model> as Borrow<model::dc_motor::Model>>::borrow(&model), 10.0);
 
     // Define parameters
     let f = 20usize;
@@ -35,8 +26,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define a pulse trajectory
     let trajectory = trajectory::generate_pulse_trajectory(time_steps);
 
-    // // Set the initial state
-    let x0 = x0_test;
+    // Set the initial state
+    let x0 = na::DVector::<f64>::zeros(model.get_mat_a().nrows());
 
     // Initialize the states
     let mut states = na::DMatrix::<f64>::zeros(x0.nrows(), 1);
@@ -84,11 +75,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let root = BitMapBackend::new("step_response.png", (800, 600)).into_drawing_area();
         root.fill(&WHITE)?;
 
-        let max_y = system_response
+        let max_y = step_response
             .iter()
             .cloned()
             .fold(f64::NEG_INFINITY, f64::max);
-        let min_y = system_response
+        let min_y = step_response
             .iter()
             .cloned()
             .fold(f64::INFINITY, f64::min);
@@ -97,12 +88,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .margin(10)
             .x_label_area_size(30)
             .y_label_area_size(40)
-            .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
+            .build_cartesian_2d(0..step_response.len() as i32, min_y..max_y)?;
 
         chart.configure_mesh().draw()?;
 
         // Plot input
-        let series_input: Vec<(i32, f64)> = input_test
+        let series_input: Vec<(i32, f64)> = step
             .row(0)
             .iter()
             .enumerate()
@@ -115,7 +106,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .legend(move |(x, y)| PathElement::new([(x, y), (x + 20, y)], &Palette99::pick(0)));
 
         // Plot system response
-        let series_y: Vec<(i32, f64)> = system_response
+        let series_y: Vec<(i32, f64)> = step_response
             .iter()
             .enumerate()
             .map(|(i, &val)| (i as i32, val as f64))
@@ -146,7 +137,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .margin(10)
             .x_label_area_size(30)
             .y_label_area_size(40)
-            .build_cartesian_2d(0..system_response.len() as i32, min_y..max_y)?;
+            .build_cartesian_2d(0..step_response.len() as i32, min_y..max_y)?;
 
         chart.configure_mesh().draw()?;
 
