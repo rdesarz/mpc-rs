@@ -23,6 +23,6 @@ RUN curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 RUN cargo install cargo-generate
 
 # Copy the project inside the image
-COPY . /root/mpc-rs
+COPY . /root/control-sys-rs
 
-WORKDIR /root/mpc-rs
+WORKDIR /root/control-sys-rs
