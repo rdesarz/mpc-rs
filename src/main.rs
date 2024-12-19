@@ -1,8 +1,8 @@
-use mpc_rs::control::controller;
-use mpc_rs::control::model;
-use mpc_rs::control::model::DiscreteStateSpaceModel;
-use mpc_rs::control::simulator;
-use mpc_rs::control::trajectory;
+use control_sys_rs::control::controller;
+use control_sys_rs::control::model;
+use control_sys_rs::control::model::DiscreteStateSpaceModel;
+use control_sys_rs::control::simulator;
+use control_sys_rs::control::trajectory;
 
 use plotters::prelude::*;
 
