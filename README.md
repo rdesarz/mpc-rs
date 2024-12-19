@@ -1,4 +1,4 @@
-# mpc-rs
+# Control system library 
 
 To setup Docker container
 
